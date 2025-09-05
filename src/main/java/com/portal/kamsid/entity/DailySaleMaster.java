@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-public class DailyProductionMaster {
+public class DailySaleMaster {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -23,5 +23,6 @@ public class DailyProductionMaster {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    private String bill_no;
     private String remarks;
 }

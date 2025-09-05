@@ -17,28 +17,35 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repo;
 
-    public ProductServiceImpl(ProductRepository repo) { this.repo = repo; }
+    public ProductServiceImpl(ProductRepository repo) {
+        this.repo = repo;
+    }
 
     @Override
     public ProductResponseDto create(ProductRequestDto dto) {
         Product p = new Product();
         p.setProductName(dto.getProductName());
-        p.setDescription(dto.getDescription());
-        p.setCategory(dto.getCategory());
+        p.setColour(dto.getColour());
+        p.setUnit(dto.getUnit());
         p.setWeight(dto.getWeight());
-        p.setSize(dto.getSize());
+        p.setQuantity(dto.getQuantity());
+
         Product saved = repo.save(p);
         return toDto(saved);
     }
 
     @Override
     public List<ProductResponseDto> getAll() {
-        return repo.findAll().stream().map(this::toDto).collect(Collectors.toList());
+        return repo.findAll()
+                .stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     public ProductResponseDto getById(Long id) {
-        Product p = repo.findById(id).orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
+        Product p = repo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
         return toDto(p);
     }
 
@@ -46,10 +53,10 @@ public class ProductServiceImpl implements ProductService {
         ProductResponseDto dto = new ProductResponseDto();
         dto.setId(p.getId());
         dto.setProductName(p.getProductName());
-        dto.setDescription(p.getDescription());
-        dto.setCategory(p.getCategory());
+        dto.setColour(p.getColour());
+        dto.setUnit(p.getUnit());
         dto.setWeight(p.getWeight());
-        dto.setSize(p.getSize());
+        dto.setQuantity(p.getQuantity());
         return dto;
     }
 }
