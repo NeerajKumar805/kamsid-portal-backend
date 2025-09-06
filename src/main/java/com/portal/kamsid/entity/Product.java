@@ -21,6 +21,7 @@ public class Product {
     @Column(name = "product_name", nullable = false)
     private String productName;
 
+    private String type;
     private String colour;
     private String unit;
     private String weight;

@@ -10,6 +10,7 @@ public class ProductRequestDto {
     @NotBlank
     private String productName;
     private String colour;
+    private String type;
     private String unit;
     private String weight;
     private String quantity;

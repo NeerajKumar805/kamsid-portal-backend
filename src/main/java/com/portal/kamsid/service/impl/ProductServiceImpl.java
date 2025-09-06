@@ -26,6 +26,7 @@ public class ProductServiceImpl implements ProductService {
         Product p = new Product();
         p.setProductName(dto.getProductName());
         p.setColour(dto.getColour());
+        p.setType(dto.getType());
         p.setUnit(dto.getUnit());
         p.setWeight(dto.getWeight());
         p.setQuantity(dto.getQuantity());
@@ -54,6 +55,7 @@ public class ProductServiceImpl implements ProductService {
         dto.setId(p.getId());
         dto.setProductName(p.getProductName());
         dto.setColour(p.getColour());
+        dto.setType(p.getType());
         dto.setUnit(p.getUnit());
         dto.setWeight(p.getWeight());
         dto.setQuantity(p.getQuantity());
