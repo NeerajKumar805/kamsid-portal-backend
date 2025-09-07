@@ -2,7 +2,7 @@
 # Kamsid Portal Backend
 
 This is a Spring Boot backend for **Kamsid Portal**, built with Maven and PostgreSQL.  
-It manages products and daily production entries with a clean layered architecture (Controller → Service → Repository).  
+It manages products and daily production entries with a clean layered architecture.  
 Standardized API responses and DTOs are used across endpoints.
 
 ---
@@ -31,7 +31,7 @@ com.portal.kamsid
 ````
 ---
 
-## API Endpoints
+## API Endpoints Examples
 
 | Method | Endpoint                  | Description                      |
 |--------|---------------------------|----------------------------------|
@@ -63,7 +63,7 @@ cd kamsid-portal-backend
 
 ### 2. Configure PostgreSQL
 
-Create a database in PostgreSQL (e.g. `kamsid_db`) and update `src/main/resources/application.properties`:
+Create a database in PostgreSQL (`kamsid_portal`) and update `src/main/resources/application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/kamsid_portal
