@@ -6,6 +6,7 @@ import com.portal.kamsid.service.ProductService;
 import com.portal.kamsid.util.ApiPaths;
 import com.portal.kamsid.util.ApiResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,10 +15,10 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping(ApiPaths.PRODUCTS)
+@RequiredArgsConstructor
 public class ProductController {
 
     private final ProductService service;
-    public ProductController(ProductService service) { this.service = service; }
 
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponseDto>> create(@Valid @RequestBody ProductRequestDto dto) {

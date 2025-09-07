@@ -1,10 +1,7 @@
 package com.portal.kamsid.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
@@ -13,6 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class DailySaleMaster {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

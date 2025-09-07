@@ -5,6 +5,7 @@ import com.portal.kamsid.dto.ProductResponseDto;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.ProductService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,26 +14,23 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository repo;
 
-    public ProductServiceImpl(ProductRepository repo) {
-        this.repo = repo;
-    }
-
     @Override
-    public ProductResponseDto create(ProductRequestDto dto) {
-        Product p = new Product();
-        p.setProductName(dto.getProductName());
-        p.setColour(dto.getColour());
-        p.setType(dto.getType());
-        p.setUnit(dto.getUnit());
-        p.setWeight(dto.getWeight());
-        p.setQuantity(dto.getQuantity());
+    public ProductResponseDto create(ProductRequestDto p) {
+        Product build = Product.builder()
+                .productName(p.getProductName())
+                .colour(p.getColour())
+                .type(p.getType())
+                .unit(p.getUnit())
+                .weight(p.getWeight())
+                .quantity(p.getQuantity())
+                .build();
 
-        Product saved = repo.save(p);
-        return toDto(saved);
+        return toDto(repo.save(build));
     }
 
     @Override
@@ -51,14 +49,15 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private ProductResponseDto toDto(Product p) {
-        ProductResponseDto dto = new ProductResponseDto();
-        dto.setId(p.getId());
-        dto.setProductName(p.getProductName());
-        dto.setColour(p.getColour());
-        dto.setType(p.getType());
-        dto.setUnit(p.getUnit());
-        dto.setWeight(p.getWeight());
-        dto.setQuantity(p.getQuantity());
-        return dto;
+
+        return ProductResponseDto.builder()
+                .id(p.getId())
+                .productName(p.getProductName())
+                .colour(p.getColour())
+                .type(p.getType())
+                .unit(p.getUnit())
+                .weight(p.getWeight())
+                .quantity(p.getQuantity())
+                .build();
     }
 }

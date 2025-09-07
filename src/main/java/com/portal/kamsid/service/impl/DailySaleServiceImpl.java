@@ -7,6 +7,7 @@ import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.DailySaleRepository;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.DailySaleService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,29 +17,25 @@ import java.util.stream.Collectors;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class DailySaleServiceImpl implements DailySaleService {
 
     private final DailySaleRepository dailySaleRepo;
     private final ProductRepository productRepo;
-
-    public DailySaleServiceImpl(DailySaleRepository dailySaleRepo, ProductRepository productRepo) {
-        this.dailySaleRepo = dailySaleRepo;
-        this.productRepo = productRepo;
-    }
 
     @Override
     public DailySaleResponseDto create(DailySaleRequestDto dto) {
         Product p = productRepo.findById(dto.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("Product not found: " + dto.getProductId()));
 
-        DailySaleMaster d = new DailySaleMaster();
-        d.setDate(dto.getDate());
-        d.setProduct(p);
-        d.setBill_no(dto.getBillNo());
-        d.setRemarks(dto.getRemarks());
+        DailySaleMaster d = DailySaleMaster.builder()
+                .date(dto.getDate())
+                .bill_no(dto.getBillNo())
+                .product(p)
+                .remarks(dto.getRemarks())
+                .build();
 
-        DailySaleMaster saved = dailySaleRepo.save(d);
-        return toDto(saved);
+        return toDto(dailySaleRepo.save(d));
     }
 
     @Override
@@ -52,13 +49,13 @@ public class DailySaleServiceImpl implements DailySaleService {
     }
 
     private DailySaleResponseDto toDto(DailySaleMaster d) {
-        DailySaleResponseDto dto = new DailySaleResponseDto();
-        dto.setId(d.getId());
-        dto.setDate(d.getDate());
-        dto.setProductId(d.getProduct().getId());
-        dto.setProductName(d.getProduct().getProductName());
-        dto.setBillNo(d.getBill_no());
-        dto.setRemarks(d.getRemarks());
-        return dto;
+        return DailySaleResponseDto.builder()
+                .id(d.getId())
+                .date(d.getDate())
+                .productId(d.getProduct().getId())
+                .productName(d.getProduct().getProductName())
+                .billNo(d.getBill_no())
+                .remarks(d.getRemarks())
+                .build();
     }
 }
