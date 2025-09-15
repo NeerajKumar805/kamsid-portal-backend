@@ -1,5 +1,6 @@
 package com.portal.kamsid.dto;
 
+import com.portal.kamsid.entity.Product;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -12,7 +13,6 @@ import java.time.LocalDate;
 public class DailyProductionResponseDto {
     private Long id;
     private LocalDate date;
-    private Long productId;
-    private String productName;
     private String remarks;
+    private ProductResponseDto product;
 }

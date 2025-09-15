@@ -2,6 +2,7 @@ package com.portal.kamsid.service.impl;
 
 import com.portal.kamsid.dto.DailySaleRequestDto;
 import com.portal.kamsid.dto.DailySaleResponseDto;
+import com.portal.kamsid.dto.ProductResponseDto;
 import com.portal.kamsid.entity.DailySaleMaster;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.DailySaleRepository;
@@ -52,10 +53,18 @@ public class DailySaleServiceImpl implements DailySaleService {
         return DailySaleResponseDto.builder()
                 .id(d.getId())
                 .date(d.getDate())
-                .productId(d.getProduct().getId())
-                .productName(d.getProduct().getProductName())
                 .billNo(d.getBill_no())
                 .remarks(d.getRemarks())
+                .product(ProductResponseDto.builder()
+                        .id(d.getProduct().getId())
+                        .productName(d.getProduct().getProductName())
+                        .type(d.getProduct().getType())
+                        .colour(d.getProduct().getColour())
+                        .unit(d.getProduct().getUnit())
+                        .weight(d.getProduct().getWeight())
+                        .quantity(d.getProduct().getQuantity())
+                        .build()
+                )
                 .build();
     }
 }

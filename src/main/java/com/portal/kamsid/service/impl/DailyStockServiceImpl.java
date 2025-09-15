@@ -2,6 +2,7 @@ package com.portal.kamsid.service.impl;
 
 import com.portal.kamsid.dto.DailyStockRequestDto;
 import com.portal.kamsid.dto.DailyStockResponseDto;
+import com.portal.kamsid.dto.ProductResponseDto;
 import com.portal.kamsid.entity.DailyStockMaster;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.DailyStockRepository;
@@ -52,10 +53,18 @@ public class DailyStockServiceImpl implements DailyStockService {
         return DailyStockResponseDto.builder()
                 .id(d.getId())
                 .date(d.getDate())
-                .productId(d.getProduct().getId())
-                .productName(d.getProduct().getProductName())
                 .billNo(d.getBill_no())
                 .remarks(d.getRemarks())
+                .product(ProductResponseDto.builder()
+                        .id(d.getProduct().getId())
+                        .productName(d.getProduct().getProductName())
+                        .type(d.getProduct().getType())
+                        .colour(d.getProduct().getColour())
+                        .unit(d.getProduct().getUnit())
+                        .weight(d.getProduct().getWeight())
+                        .quantity(d.getProduct().getQuantity())
+                        .build()
+                )
                 .build();
     }
 }

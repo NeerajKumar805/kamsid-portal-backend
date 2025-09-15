@@ -2,6 +2,7 @@ package com.portal.kamsid.service.impl;
 
 import com.portal.kamsid.dto.DailyProductionRequestDto;
 import com.portal.kamsid.dto.DailyProductionResponseDto;
+import com.portal.kamsid.dto.ProductResponseDto;
 import com.portal.kamsid.entity.DailyProductionMaster;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.DailyProductionRepository;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class DailyProductionServiceImpl implements DailyProductionService {
 
     private final DailyProductionRepository dailyRepo;
+
     private final ProductRepository productRepo;
 
     @Override
@@ -49,9 +51,17 @@ public class DailyProductionServiceImpl implements DailyProductionService {
         return DailyProductionResponseDto.builder()
                 .id(d.getId())
                 .date(d.getDate())
-                .productId(d.getProduct().getId())
-                .productName(d.getProduct().getProductName())
                 .remarks(d.getRemarks())
+                .product(ProductResponseDto.builder()
+                        .id(d.getProduct().getId())
+                        .productName(d.getProduct().getProductName())
+                        .type(d.getProduct().getType())
+                        .colour(d.getProduct().getColour())
+                        .unit(d.getProduct().getUnit())
+                        .weight(d.getProduct().getWeight())
+                        .quantity(d.getProduct().getQuantity())
+                        .build()
+                )
                 .build();
     }
 }

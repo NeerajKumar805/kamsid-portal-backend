@@ -12,10 +12,7 @@ import java.time.LocalDate;
 public class DailyStockResponseDto {
     private Long id;
     private LocalDate date;
-
-    private Long productId;
-    private String productName;
-
     private String billNo;
     private String remarks;
+    private ProductResponseDto product;
 }

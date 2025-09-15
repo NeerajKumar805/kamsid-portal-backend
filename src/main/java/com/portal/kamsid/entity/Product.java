@@ -15,7 +15,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // exact field names per earlier discussion (use product_name for clarity)
     @Column(name = "product_name", nullable = false)
     private String productName;
 
