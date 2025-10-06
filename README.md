@@ -196,11 +196,10 @@ localhost:8080/api/daily-production
 ```json
 {
   "date": "2025-09-15",
-  "productId": 4,
+  "productIds": [1,3,4,5],
   "billNo": "BILL-2002",
   "remarks": "Added to packaging materials section"
 }
-
 
 ```
 
@@ -254,7 +253,7 @@ localhost:8080/api/daily-stock
 ```json
 {
   "date": "2025-09-15",
-  "productId": 2,
+  "productIds":[1,3],
   "billNo": "SALE-3001",
   "remarks": "Sold 200 units to Client A"
 }
