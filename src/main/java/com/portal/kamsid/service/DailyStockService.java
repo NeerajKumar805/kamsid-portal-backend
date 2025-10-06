@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface DailyStockService {
-    DailyStockResponseDto create(DailyStockRequestDto dto);
+    List<DailyStockResponseDto> create(DailyStockRequestDto dto);
 
     List<DailyStockResponseDto> getAll();
 

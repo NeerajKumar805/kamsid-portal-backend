@@ -13,8 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.stream.Collectors;
+import java.util.*;
+import java.util.function.Function;
 
 @Service
 @Transactional
@@ -25,18 +26,35 @@ public class DailyStockServiceImpl implements DailyStockService {
     private final ProductRepository productRepo;
 
     @Override
-    public DailyStockResponseDto create(DailyStockRequestDto dto) {
-        Product p = productRepo.findById(dto.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + dto.getProductId()));
+    public List<DailyStockResponseDto> create(DailyStockRequestDto dto) {
+        List<Long> ids = new ArrayList<>(new LinkedHashSet<>(dto.getProductIds()));
 
-        DailyStockMaster d = DailyStockMaster.builder()
-                .date(dto.getDate())
-                .bill_no(dto.getBillNo())
-                .product(p)
-                .remarks(dto.getRemarks())
-                .build();
+        List<Product> products = productRepo.findAllById(ids);
 
-        return toDto(dailyStockRepo.save(d));
+        Set<Long> found = products.stream().map(Product::getId).collect(Collectors.toSet());
+        List<Long> missing = ids.stream().filter(id -> !found.contains(id)).toList();
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Products not found: " + missing);
+        }
+
+        Map<Long, Product> idToProduct = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity(), (a, b) -> a));
+
+        List<DailyStockMaster> toSave = new ArrayList<>();
+        for (Long pid : ids) {
+            Product p = idToProduct.get(pid);
+            DailyStockMaster d = DailyStockMaster.builder()
+                    .date(dto.getDate())
+                    .bill_no(dto.getBillNo())
+                    .product(p)
+                    .remarks(dto.getRemarks())
+                    .build();
+            toSave.add(d);
+        }
+
+        List<DailyStockMaster> saved = dailyStockRepo.saveAll(toSave);
+
+        return saved.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override

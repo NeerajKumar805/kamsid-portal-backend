@@ -13,7 +13,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -25,18 +26,36 @@ public class DailySaleServiceImpl implements DailySaleService {
     private final ProductRepository productRepo;
 
     @Override
-    public DailySaleResponseDto create(DailySaleRequestDto dto) {
-        Product p = productRepo.findById(dto.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + dto.getProductId()));
+    public List<DailySaleResponseDto> create(DailySaleRequestDto dto) {
+        List<Long> ids = new ArrayList<>(new LinkedHashSet<>(dto.getProductIds()));
 
-        DailySaleMaster d = DailySaleMaster.builder()
-                .date(dto.getDate())
-                .bill_no(dto.getBillNo())
-                .product(p)
-                .remarks(dto.getRemarks())
-                .build();
+        List<Product> products = productRepo.findAllById(ids);
 
-        return toDto(dailySaleRepo.save(d));
+        Set<Long> found = products.stream().map(Product::getId).collect(Collectors.toSet());
+        List<Long> missing = ids.stream().filter(id -> !found.contains(id)).toList();
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Products not found: " + missing);
+        }
+
+        Map<Long, Product> idToProduct = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity(), (a, b) -> a));
+
+        // build entities
+        List<DailySaleMaster> toSave = new ArrayList<>();
+        for (Long pid : ids) {
+            Product p = idToProduct.get(pid);
+            DailySaleMaster sale = DailySaleMaster.builder()
+                    .date(dto.getDate())
+                    .bill_no(dto.getBillNo())
+                    .product(p)
+                    .remarks(dto.getRemarks())
+                    .build();
+            toSave.add(sale);
+        }
+
+        List<DailySaleMaster> saved = dailySaleRepo.saveAll(toSave);
+
+        return saved.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override

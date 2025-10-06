@@ -25,9 +25,9 @@ public class DailySaleController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DailySaleResponseDto>> create(
+    public ResponseEntity<ApiResponse<List<DailySaleResponseDto>>> create(
             @Valid @RequestBody DailySaleRequestDto dto) {
-        DailySaleResponseDto created = service.create(dto);
+        List<DailySaleResponseDto> created = service.create(dto);
         return ResponseEntity.status(201).body(ApiResponse.success("Daily sale created", created));
     }
 
