@@ -142,7 +142,7 @@ localhost:8080/api/products
 ```json
 {
   "date": "2025-09-15",
-  "productId": 4,
+  "productIds": [1,2,3],
   "remarks": "New batch completed and moved to storage"
 }
 
