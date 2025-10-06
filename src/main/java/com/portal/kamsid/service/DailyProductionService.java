@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface DailyProductionService {
     DailyProductionResponseDto create(DailyProductionRequestDto dto);
+    List<DailyProductionResponseDto> createMany(DailyProductionRequestDto dto);
     List<DailyProductionResponseDto> getAll();
     List<DailyProductionResponseDto> getByDateRange(LocalDate start, LocalDate end);
 }

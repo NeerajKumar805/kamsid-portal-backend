@@ -22,8 +22,8 @@ public class DailyProductionController {
     public DailyProductionController(DailyProductionService service) { this.service = service; }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<DailyProductionResponseDto>> create(@Valid @RequestBody DailyProductionRequestDto dto) {
-        DailyProductionResponseDto created = service.create(dto);
+    public ResponseEntity<ApiResponse<List<DailyProductionResponseDto>>> create(@Valid @RequestBody DailyProductionRequestDto dto) {
+        List<DailyProductionResponseDto> created = service.createMany(dto);
         return ResponseEntity.status(201).body(ApiResponse.success("Daily production created", created));
     }
 

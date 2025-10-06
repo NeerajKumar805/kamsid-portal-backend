@@ -13,7 +13,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +31,7 @@ public class DailyProductionServiceImpl implements DailyProductionService {
 
     @Override
     public DailyProductionResponseDto create(DailyProductionRequestDto dto) {
-        Product p = productRepo.findById(dto.getProductId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + dto.getProductId()));
+        Product p = productRepo.findById(dto.getId()).orElseThrow(() -> new IllegalArgumentException("Product not found: " + dto.getId()));
         DailyProductionMaster d = DailyProductionMaster.builder()
                 .date(dto.getDate())
                 .product(p)
@@ -35,6 +39,35 @@ public class DailyProductionServiceImpl implements DailyProductionService {
                 .build();
 
         return toDto(dailyRepo.save(d));
+    }
+
+    @Transactional
+    public List<DailyProductionResponseDto> createMany(DailyProductionRequestDto dto) {
+        List<Long> ids = dto.getProductIds().stream().distinct().collect(Collectors.toList());
+        List<Product> products = productRepo.findAllById(ids);
+
+        Set<Long> found = products.stream().map(Product::getId).collect(Collectors.toSet());
+        List<Long> missing = ids.stream().filter(id -> !found.contains(id)).collect(Collectors.toList());
+        if (!missing.isEmpty()) {
+            throw new IllegalArgumentException("Products not found: " + missing);
+        }
+
+        Map<Long, Product> idToProduct = products.stream()
+                .collect(Collectors.toMap(Product::getId, Function.identity()));
+
+        List<DailyProductionMaster> toSave = new ArrayList<>();
+        for (Long pid : dto.getProductIds()) {
+            Product p = idToProduct.get(pid);
+            DailyProductionMaster d = DailyProductionMaster.builder()
+                    .date(dto.getDate())
+                    .product(p)
+                    .remarks(dto.getRemarks())
+                    .build();
+            toSave.add(d);
+        }
+
+        List<DailyProductionMaster> saved = dailyRepo.saveAll(toSave);
+        return saved.stream().map(this::toDto).collect(Collectors.toList());
     }
 
     @Override
@@ -48,20 +81,22 @@ public class DailyProductionServiceImpl implements DailyProductionService {
     }
 
     private DailyProductionResponseDto toDto(DailyProductionMaster d) {
+        Product p = d.getProduct();
+        ProductResponseDto prodDto = ProductResponseDto.builder()
+                .id(p.getId())
+                .productName(p.getProductName())
+                .colour(p.getColour())
+                .type(p.getType())
+                .unit(p.getUnit())
+                .weight(p.getWeight())
+                .quantity(p.getQuantity())
+                .build();
+
         return DailyProductionResponseDto.builder()
                 .id(d.getId())
                 .date(d.getDate())
                 .remarks(d.getRemarks())
-                .product(ProductResponseDto.builder()
-                        .id(d.getProduct().getId())
-                        .productName(d.getProduct().getProductName())
-                        .type(d.getProduct().getType())
-                        .colour(d.getProduct().getColour())
-                        .unit(d.getProduct().getUnit())
-                        .weight(d.getProduct().getWeight())
-                        .quantity(d.getProduct().getQuantity())
-                        .build()
-                )
+                .product(prodDto)
                 .build();
     }
 }
