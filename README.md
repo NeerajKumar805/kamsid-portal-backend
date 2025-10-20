@@ -87,104 +87,215 @@ The app will start at:
 
 ## Example Payloads
 
-### Create Product
+## 1. Product API
+
+### 1.1 Create Product
+
+**Endpoint:** `POST /api/products`
+
+**Request Payload:**
 
 ```json
 {
-  "productName": "Heavy-Duty Dust Cover Sheet 6×6 ft",
-  "type": "Dunnage & Dust Covers",
-  "colour": "Gray",
-  "unit": "Piece",
-  "weight": "1.8 kg",
-  "quantity": "150"
+  "productName": "PVC Pipe"
 }
-
 ```
 
-### Get all Products
-
-```
-localhost:8080/api/products
-```
+**Response Payload:**
 
 ```json
 {
-    "success": true,
-    "message": "Products fetched",
-    "data": [
-        {
-            "id": 1,
-            "productName": "PP Bin Lid Clamp",
-            "colour": "Natural",
-            "type": "PP Bins Accessories",
-            "unit": "Piece",
-            "weight": "0.05 kg",
-            "quantity": "1000"
-        },
-        {
-            "id": 2,
-            "productName": "HDPE Crate Handle Injection Mold",
-            "colour": "Black",
-            "type": "HDPE Crate Accessories",
-            "unit": "Pair",
-            "weight": "0.12 kg",
-            "quantity": "500"
-        },
-        ... (Many more products)
-    ]
+  "status": "success",
+  "message": "Product created",
+  "data": {
+    "id": 1,
+    "productName": "PVC Pipe"
+  }
 }
-
-
 ```
 
-### Create Daily Production
+### 1.2 Get All Products
+
+**Endpoint:** `GET /api/products`
+
+**Response Payload:**
 
 ```json
 {
-  "date": "2025-09-15",
-  "productIds": [1,2,3],
-  "remarks": "New batch completed and moved to storage"
+  "status": "success",
+  "message": "Products fetched",
+  "data": [
+    {
+      "id": 1,
+      "productName": "PVC Pipe"
+    },
+    {
+      "id": 2,
+      "productName": "Plastic Sheet"
+    }
+  ]
 }
-
 ```
 
-### Get all Daily Production List
+### 1.3 Get Product by ID
 
-```
-localhost:8080/api/daily-production
-```
+**Endpoint:** `GET /api/products/{id}`
+
+**Response Payload:**
+
 ```json
+{
+  "status": "success",
+  "message": "Product fetched",
+  "data": {
+    "id": 1,
+    "productName": "PVC Pipe"
+  }
+}
+```
+
+---
+
+## 2. Daily Production API
+
+### 2.1 Create Daily Production
+
+**Endpoint:** `POST /api/daily-production`
+
+**Request Payload Example 1 (with master date and per-product dates):**
+
+```json
+{
+  "date": "2025-10-20",
+  "products": [
+    {
+      "product_id": 1,
+      "date": "2025-10-20",
+      "colour": "Red",
+      "unit": "kg",
+      "weight": 12.5,
+      "quantity": 100,
+      "type": "Finished",
+      "remark": "Morning batch"
+    },
+    {
+      "product_id": 2,
+      "date": "2025-10-19",
+      "colour": "Blue",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 250,
+      "type": "Semi-Finished",
+      "remark": "Yesterday’s pending lot"
+    }
+  ],
+  "remark": "Production for 20-Oct-2025"
+}
+```
+
+**Request Payload Example 2 (without master date, uses today's date):**
+
+```json
+{
+  "products": [
+    {
+      "product_id": 1,
+      "colour": "White",
+      "unit": "kg",
+      "weight": 8.5,
+      "quantity": 75,
+      "type": "Finished",
+      "remark": "Afternoon run"
+    },
+    {
+      "product_id": 3,
+      "colour": "Green",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 120,
+      "type": "Finished",
+      "remark": "Special order"
+    }
+  ],
+  "remark": "Auto-date master (today’s entry)"
+}
+```
+
+**Response Payload:**
+
+```json
+{
+  "status": "success",
+  "message": "Daily production created",
+  "data": [
+    {
+      "id": 5,
+      "date": "2025-10-20",
+      "masterRemark": "Production for 20-Oct-2025",
+      "productId": 1,
+      "productName": "PVC Pipe",
+      "productDetailsId": 12,
+      "type": "Finished",
+      "colour": "Red",
+      "unit": "kg",
+      "weight": 12.5,
+      "quantity": 100,
+      "productRemark": "Morning batch"
+    },
+    {
+      "id": 5,
+      "date": "2025-10-19",
+      "masterRemark": "Production for 20-Oct-2025",
+      "productId": 2,
+      "productName": "Plastic Sheet",
+      "productDetailsId": 13,
+      "type": "Semi-Finished",
+      "colour": "Blue",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 250,
+      "productRemark": "Yesterday’s pending lot"
+    }
+  ]
+}
+```
+
+### 2.2 Get Daily Production
+
+**Endpoint:** `GET /api/daily-production?start=yyyy-MM-dd&end=yyyy-MM-dd`
+
+```
 {
     "success": true,
     "message": "Daily production fetched",
     "data": [
         {
             "id": 1,
-            "date": "2025-09-15",
-            "remarks": "Produced 150 units in Plant A",
-            "product": {
-                "id": 3,
-                "productName": "Pallet Sleeve Box – 1000×800 mm",
-                "colour": "Blue",
-                "type": "Pallet Sleeve Box",
-                "unit": "Box",
-                "weight": "2.5 kg",
-                "quantity": "200"
-            }
+            "date": "2025-10-20",
+            "masterRemark": "Production for 20-Oct-2025",
+            "productId": 4,
+            "productName": "HDPE CRATE ACCESSORIES",
+            "productDetailsId": 1,
+            "type": "Finished",
+            "colour": "Red",
+            "unit": "kg",
+            "weight": 12.5000,
+            "quantity": 100.0000,
+            "productRemark": "Morning batch"
         },
         {
-            "id": 2,
-            "date": "2025-09-15",
-            "remarks": "New batch completed and moved to storage",
-            "product": {
-                "id": 4,
-                "productName": "Stretch Film Roll 20 micron",
-                "colour": "Transparent",
-                "type": "Rolls",
-                "unit": "Roll",
-                "weight": "1.5 kg",
-                "quantity": "300"
-            }
+            "id": 1,
+            "date": "2025-10-19",
+            "masterRemark": "Production for 20-Oct-2025",
+            "productId": 5,
+            "productName": "PVC Pipe",
+            "productDetailsId": 2,
+            "type": "Semi-Finished",
+            "colour": "Blue",
+            "unit": "pcs",
+            "weight": 0.0000,
+            "quantity": 250.0000,
+            "productRemark": "Yesterday’s pending lot"
         }
     ]
 }
