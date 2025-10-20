@@ -8,19 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "products")
 @Builder
+@Table(name = "products")
 public class Product {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "pid")
+	private Long pid;
 
-    @Column(name = "product_name", nullable = false)
-    private String productName;
-
-    private String type;
-    private String colour;
-    private String unit;
-    private String weight;
-    private String quantity;
+	@Column(name = "product_name", nullable = false, unique = true)
+	private String productName;
 }

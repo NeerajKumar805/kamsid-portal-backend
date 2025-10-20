@@ -1,63 +1,51 @@
 package com.portal.kamsid.service.impl;
 
-import com.portal.kamsid.dto.ProductRequestDto;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.portal.kamsid.dto.ProductResponseDto;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.ProductService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final ProductRepository repo;
+	private final ProductRepository repo;
 
-    @Override
-    public ProductResponseDto create(ProductRequestDto p) {
-        Product build = Product.builder()
-                .productName(p.getProductName())
-                .colour(p.getColour())
-                .type(p.getType())
-                .unit(p.getUnit())
-                .weight(p.getWeight())
-                .quantity(p.getQuantity())
-                .build();
+	@Override
+	public ProductResponseDto create(ProductResponseDto dto) {
+		String name = dto.getProductName().trim();
 
-        return toDto(repo.save(build));
-    }
+		// ensure unique product name
+		if (repo.existsByProductNameIgnoreCase(name)) {
+			throw new IllegalArgumentException("Product with name '" + name + "' already exists");
+		}
 
-    @Override
-    public List<ProductResponseDto> getAll() {
-        return repo.findAll()
-                .stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-    }
+		Product saved = repo.save(Product.builder().productName(name).build());
 
-    @Override
-    public ProductResponseDto getById(Long id) {
-        Product p = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Product not found: " + id));
-        return toDto(p);
-    }
+		return ProductResponseDto.builder().id(saved.getPid()).productName(saved.getProductName()).build();
+	}
 
-    private ProductResponseDto toDto(Product p) {
+	@Override
+	public List<ProductResponseDto> getAll() {
+		return repo.findAll().stream()
+				.map(p -> ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).build())
+				.collect(Collectors.toList());
+	}
 
-        return ProductResponseDto.builder()
-                .id(p.getId())
-                .productName(p.getProductName())
-                .colour(p.getColour())
-                .type(p.getType())
-                .unit(p.getUnit())
-                .weight(p.getWeight())
-                .quantity(p.getQuantity())
-                .build();
-    }
+	@Override
+	public ProductResponseDto getById(Long id) {
+		Product p = repo.findById(id)
+				.orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
+
+		return ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).build();
+	}
 }

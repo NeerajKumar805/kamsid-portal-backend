@@ -1,12 +1,14 @@
 package com.portal.kamsid.service;
 
-import com.portal.kamsid.dto.ProductRequestDto;
-import com.portal.kamsid.dto.ProductResponseDto;
-
 import java.util.List;
 
+import com.portal.kamsid.dto.ProductResponseDto;
+
 public interface ProductService {
-    ProductResponseDto create(ProductRequestDto dto);
-    List<ProductResponseDto> getAll();
-    ProductResponseDto getById(Long id);
+
+	ProductResponseDto create(ProductResponseDto dto);
+
+	List<ProductResponseDto> getAll();
+
+	ProductResponseDto getById(Long id);
 }

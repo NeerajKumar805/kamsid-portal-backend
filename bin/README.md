@@ -2,7 +2,7 @@
 # Kamsid Portal Backend
 
 This is a Spring Boot backend for **Kamsid Portal**, built with Maven and PostgreSQL.  
-It manages products and daily production entries with a clean layered architecture (Controller → Service → Repository).  
+It manages products and daily production entries with a clean layered architecture.  
 Standardized API responses and DTOs are used across endpoints.
 
 ---
@@ -22,16 +22,16 @@ Standardized API responses and DTOs are used across endpoints.
 com.portal.kamsid
 ├── controller        # REST Controllers
 ├── dto               # DTOs for requests/responses
-├── entity            # JPA entities (Product, DailyProductionMaster)
+├── entity            # JPA entities
 ├── repository        # Spring Data JPA repositories
 ├── service           # Business logic layer
-├── util              # Utility classes (API constants, ApiResponse, etc.)
+├── util              # Utility classes
 └── exception         # Global exception handler
 
 ````
 ---
 
-## API Endpoints
+## API Endpoints Examples
 
 | Method | Endpoint                  | Description                      |
 |--------|---------------------------|----------------------------------|
@@ -63,7 +63,7 @@ cd kamsid-portal-backend
 
 ### 2. Configure PostgreSQL
 
-Create a database in PostgreSQL (e.g. `kamsid_db`) and update `src/main/resources/application.properties`:
+Create a database in PostgreSQL (`kamsid_portal`) and update `src/main/resources/application.properties`:
 
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/kamsid_portal
@@ -91,13 +91,13 @@ The app will start at:
 
 ```json
 {
-  "productName": "PP BINS ACCESSORIES",
-  "description": "Includes all the accessories required for PP bins fabrication.",
-  "category": "Packaging",
-  "weight": "250 g",
-  "size": "15 MM"
+  "productName": "Heavy-Duty Dust Cover Sheet 6×6 ft",
+  "type": "Dunnage & Dust Covers",
+  "colour": "Gray",
+  "unit": "Piece",
+  "weight": "1.8 kg",
+  "quantity": "150"
 }
-
 
 ```
 
@@ -114,28 +114,23 @@ localhost:8080/api/products
     "data": [
         {
             "id": 1,
-            "productName": "PALLET SLEEVE BOX",
-            "description": "Includes all types of pallet sleeve boxes required for returnable packaging.",
-            "category": "Packaging",
-            "weight": "400 g",
-            "size": "20 MM"
+            "productName": "PP Bin Lid Clamp",
+            "colour": "Natural",
+            "type": "PP Bins Accessories",
+            "unit": "Piece",
+            "weight": "0.05 kg",
+            "quantity": "1000"
         },
         {
             "id": 2,
-            "productName": "Dunnage & Dust covers",
-            "description": "Includes all types of dunnage & dust covers.",
-            "category": "Packaging",
-            "weight": "200 g",
-            "size": "14 MM"
+            "productName": "HDPE Crate Handle Injection Mold",
+            "colour": "Black",
+            "type": "HDPE Crate Accessories",
+            "unit": "Pair",
+            "weight": "0.12 kg",
+            "quantity": "500"
         },
-        {
-            "id": 3,
-            "productName": "PP BINS ACCESSORIES",
-            "description": "Includes all the accessories required for PP bins fabrication.",
-            "category": "Packaging",
-            "weight": "250 g",
-            "size": "15 MM"
-        }
+        ... (Many more products)
     ]
 }
 
@@ -146,9 +141,9 @@ localhost:8080/api/products
 
 ```json
 {
-  "date": "2025-09-03",
-  "product": { "id": 1 },
-  "remarks": "Initial production entry for PP BINS ACCESSORIES"
+  "date": "2025-09-15",
+  "productIds": [1,2,3],
+  "remarks": "New batch completed and moved to storage"
 }
 
 ```
@@ -164,25 +159,146 @@ localhost:8080/api/daily-production
     "message": "Daily production fetched",
     "data": [
         {
+            "id": 1,
+            "date": "2025-09-15",
+            "remarks": "Produced 150 units in Plant A",
+            "product": {
+                "id": 3,
+                "productName": "Pallet Sleeve Box – 1000×800 mm",
+                "colour": "Blue",
+                "type": "Pallet Sleeve Box",
+                "unit": "Box",
+                "weight": "2.5 kg",
+                "quantity": "200"
+            }
+        },
+        {
             "id": 2,
-            "date": "2025-09-03",
-            "productId": 1,
-            "productName": "PALLET SLEEVE BOX",
-            "remarks": "Initial production entry for PP BINS ACCESSORIES"
+            "date": "2025-09-15",
+            "remarks": "New batch completed and moved to storage",
+            "product": {
+                "id": 4,
+                "productName": "Stretch Film Roll 20 micron",
+                "colour": "Transparent",
+                "type": "Rolls",
+                "unit": "Roll",
+                "weight": "1.5 kg",
+                "quantity": "300"
+            }
+        }
+    ]
+}
+
+```
+
+### Create Daily Stock
+
+```json
+{
+  "date": "2025-09-15",
+  "productIds": [1,3,4,5],
+  "billNo": "BILL-2002",
+  "remarks": "Added to packaging materials section"
+}
+
+```
+
+### Get all Daily Stock List
+
+```
+localhost:8080/api/daily-stock
+```
+```json
+{
+    "success": true,
+    "message": "Daily stock fetched",
+    "data": [
+        {
+            "id": 1,
+            "date": "2025-09-15",
+            "billNo": "BILL-2001",
+            "remarks": "Fresh stock received from vendor",
+            "product": {
+                "id": 1,
+                "productName": "PP Bin Lid Clamp",
+                "colour": "Natural",
+                "type": "PP Bins Accessories",
+                "unit": "Piece",
+                "weight": "0.05 kg",
+                "quantity": "1000"
+            }
         },
         {
-            "id": 3,
-            "date": "2025-09-04",
-            "productId": 2,
-            "productName": "Dunnage & Dust covers",
-            "remarks": "Production started for KAMBO STORAGE SYSTEMS"
+            "id": 2,
+            "date": "2025-09-15",
+            "billNo": "BILL-2002",
+            "remarks": "Added to packaging materials section",
+            "product": {
+                "id": 4,
+                "productName": "Stretch Film Roll 20 micron",
+                "colour": "Transparent",
+                "type": "Rolls",
+                "unit": "Roll",
+                "weight": "1.5 kg",
+                "quantity": "300"
+            }
+        }
+    ]
+}
+
+```
+
+### Create Daily Sale
+
+```json
+{
+  "date": "2025-09-15",
+  "productIds":[1,3],
+  "billNo": "SALE-3001",
+  "remarks": "Sold 200 units to Client A"
+}
+
+```
+
+### Get all Daily Sale List
+
+```
+localhost:8080/api/daily-sale
+```
+```json
+{
+    "success": true,
+    "message": "Daily sale fetched",
+    "data": [
+        {
+            "id": 1,
+            "date": "2025-09-15",
+            "billNo": "SALE-3001",
+            "remarks": "Sold 200 units to Client A",
+            "product": {
+                "id": 2,
+                "productName": "HDPE Crate Handle Injection Mold",
+                "colour": "Black",
+                "type": "HDPE Crate Accessories",
+                "unit": "Pair",
+                "weight": "0.12 kg",
+                "quantity": "500"
+            }
         },
         {
-            "id": 4,
-            "date": "2025-09-05",
-            "productId": 3,
-            "productName": "PP BINS ACCESSORIES",
-            "remarks": "Trial batch completed for MODULAR OFFICE FURNITURE"
+            "id": 2,
+            "date": "2025-09-15",
+            "billNo": "SALE-3002",
+            "remarks": "Delivered to Project Site B",
+            "product": {
+                "id": 5,
+                "productName": "PVC Wall Coving 50mm",
+                "colour": "White",
+                "type": "PVC Coving",
+                "unit": "Meter",
+                "weight": "0.4 kg",
+                "quantity": "1000"
+            }
         }
     ]
 }

@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -16,28 +17,28 @@ import java.util.List;
 @CrossOrigin
 @RestController
 @RequestMapping(ApiPaths.DAILY_PRODUCTION)
+@RequiredArgsConstructor
 public class DailyProductionController {
 
-    private final DailyProductionService service;
-    public DailyProductionController(DailyProductionService service) { this.service = service; }
+	private final DailyProductionService service;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<List<DailyProductionResponseDto>>> create(@Valid @RequestBody DailyProductionRequestDto dto) {
-        List<DailyProductionResponseDto> created = service.createMany(dto);
-        return ResponseEntity.status(201).body(ApiResponse.success("Daily production created", created));
-    }
+	@PostMapping
+	public ResponseEntity<ApiResponse<List<DailyProductionResponseDto>>> create(
+			@Valid @RequestBody DailyProductionRequestDto dto) {
+		List<DailyProductionResponseDto> created = service.create(dto);
+		return ResponseEntity.status(201).body(ApiResponse.success("Daily production created", created));
+	}
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<DailyProductionResponseDto>>> all(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end
-    ) {
-        List<DailyProductionResponseDto> data;
-        if (start != null && end != null) {
-            data = service.getByDateRange(start, end);
-        } else {
-            data = service.getAll();
-        }
-        return ResponseEntity.ok(ApiResponse.success("Daily production fetched", data));
-    }
+	@GetMapping
+	public ResponseEntity<ApiResponse<List<DailyProductionResponseDto>>> all(
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
+		List<DailyProductionResponseDto> data;
+		if (start != null && end != null) {
+			data = service.getByDateRange(start, end);
+		} else {
+			data = service.getAll();
+		}
+		return ResponseEntity.ok(ApiResponse.success("Daily production fetched", data));
+	}
 }

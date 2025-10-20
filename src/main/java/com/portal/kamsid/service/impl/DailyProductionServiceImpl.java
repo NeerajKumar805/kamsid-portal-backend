@@ -2,9 +2,10 @@ package com.portal.kamsid.service.impl;
 
 import com.portal.kamsid.dto.DailyProductionRequestDto;
 import com.portal.kamsid.dto.DailyProductionResponseDto;
-import com.portal.kamsid.dto.ProductResponseDto;
+import com.portal.kamsid.dto.ProductRequestDto;
 import com.portal.kamsid.entity.DailyProductionMaster;
 import com.portal.kamsid.entity.Product;
+import com.portal.kamsid.entity.ProductDetails;
 import com.portal.kamsid.repository.DailyProductionRepository;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.DailyProductionService;
@@ -22,65 +23,86 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DailyProductionServiceImpl implements DailyProductionService {
 
-    private final DailyProductionRepository dailyRepo;
+	private final DailyProductionRepository dailyRepo;
+	private final ProductRepository productRepo;
 
-    private final ProductRepository productRepo;
+	@Override
+	public List<DailyProductionResponseDto> create(DailyProductionRequestDto dto) {
+		// validate products list
+		List<ProductRequestDto> productDtos = Optional.ofNullable(dto.getProducts()).orElseGet(ArrayList::new);
+		if (productDtos.isEmpty()) {
+			throw new IllegalArgumentException("products must not be empty");
+		}
 
-    @Override
-    @Transactional
-    public List<DailyProductionResponseDto> createMany(DailyProductionRequestDto dto) {
-        List<Long> ids = new ArrayList<>(new LinkedHashSet<>(dto.getProductIds()));
-        List<Product> products = productRepo.findAllById(ids);
+		// collect product ids
+		List<Long> ids = productDtos.stream().map(ProductRequestDto::getProductId).filter(Objects::nonNull).distinct()
+				.collect(Collectors.toList());
 
-        Set<Long> found = products.stream().map(Product::getId).collect(Collectors.toSet());
-        List<Long> missing = ids.stream().filter(id -> !found.contains(id)).toList();
-        if (!missing.isEmpty()) {
-            throw new IllegalArgumentException("Products not found: " + missing);
-        }
+		if (ids.isEmpty()) {
+			throw new IllegalArgumentException("product_id must not be empty in products");
+		}
 
-        Map<Long, Product> idToProduct = products.stream()
-                .collect(Collectors.toMap(Product::getId, Function.identity(), (a,b) -> a));
+		// fetch products and validate existence
+		List<Product> products = productRepo.findAllById(ids);
+		Set<Long> found = products.stream().map(Product::getPid).collect(Collectors.toSet());
+		List<Long> missing = ids.stream().filter(id -> !found.contains(id)).collect(Collectors.toList());
+		if (!missing.isEmpty()) {
+			throw new IllegalArgumentException("Products not found: " + missing);
+		}
 
-        List<DailyProductionMaster> toSave = new ArrayList<>();
-        for (Long pid : ids) {
-            Product p = idToProduct.get(pid);
-            DailyProductionMaster d = DailyProductionMaster.builder()
-                    .date(dto.getDate())
-                    .product(p)
-                    .remarks(dto.getRemarks())
-                    .build();
-            toSave.add(d);
-        }
+		Map<Long, Product> idToProduct = products.stream()
+				.collect(Collectors.toMap(Product::getPid, Function.identity(), (a, b) -> a));
 
-        List<DailyProductionMaster> saved = dailyRepo.saveAll(toSave);
-        return saved.stream().map(this::toDto).collect(Collectors.toList());
-    }
+		// master date: use provided or today
+		LocalDate masterDate = dto.getDate() != null ? dto.getDate() : LocalDate.now();
 
-    @Override
-    public List<DailyProductionResponseDto> getAll() {
-        return dailyRepo.findAll().stream().map(this::toDto).collect(Collectors.toList());
-    }
+		// create master
+		DailyProductionMaster master = DailyProductionMaster.builder().date(masterDate).remark(dto.getRemark()).build();
 
-    @Override
-    public List<DailyProductionResponseDto> getByDateRange(LocalDate start, LocalDate end) {
-        return dailyRepo.findByDateBetween(start, end).stream().map(this::toDto).collect(Collectors.toList());
-    }
+		// build product details for each product DTO
+		for (ProductRequestDto pr : productDtos) {
+			Long pid = pr.getProductId();
+			Product product = idToProduct.get(pid);
+			if (product == null) {
+				throw new IllegalArgumentException("Product not found: " + pid);
+			}
 
-    private DailyProductionResponseDto toDto(DailyProductionMaster d) {
-        return DailyProductionResponseDto.builder()
-                .id(d.getId())
-                .date(d.getDate())
-                .remarks(d.getRemarks())
-                .product(ProductResponseDto.builder()
-                        .id(d.getProduct().getId())
-                        .productName(d.getProduct().getProductName())
-                        .type(d.getProduct().getType())
-                        .colour(d.getProduct().getColour())
-                        .unit(d.getProduct().getUnit())
-                        .weight(d.getProduct().getWeight())
-                        .quantity(d.getProduct().getQuantity())
-                        .build()
-                )
-                .build();
-    }
+			LocalDate prodDate = pr.getDate() != null ? pr.getDate() : masterDate;
+
+			ProductDetails pd = ProductDetails.builder().product(product).date(prodDate).colour(pr.getColour())
+					.type(pr.getType()).unit(pr.getUnit()).weight(pr.getWeight()).quantity(pr.getQuantity())
+					.remark(pr.getRemark()).build();
+
+			master.addProductDetails(pd);
+		}
+
+		// save master (cascades ProductDetails)
+		DailyProductionMaster saved = dailyRepo.save(master);
+
+		// return flat list of response DTOs (one per product row)
+		return saved.getProducts().stream().map(pd -> toDto(saved, pd)).collect(Collectors.toList());
+	}
+
+	@Override
+	public List<DailyProductionResponseDto> getAll() {
+		return dailyRepo.findAll().stream().flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd)))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<DailyProductionResponseDto> getByDateRange(LocalDate start, LocalDate end) {
+		return dailyRepo.findByDateBetween(start, end).stream()
+				.flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd))).collect(Collectors.toList());
+	}
+
+	private DailyProductionResponseDto toDto(DailyProductionMaster d, ProductDetails pd) {
+		Product p = pd.getProduct();
+		return DailyProductionResponseDto.builder().id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark())
+
+				.productId(p.getPid()).productName(p.getProductName())
+
+				.productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour()).unit(pd.getUnit())
+				.weight(pd.getWeight()).quantity(pd.getQuantity()).productRemark(pd.getRemark()).build();
+	}
+
 }

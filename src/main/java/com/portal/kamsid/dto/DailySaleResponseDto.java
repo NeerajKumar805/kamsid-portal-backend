@@ -15,5 +15,5 @@ public class DailySaleResponseDto {
     private LocalDate date;
     private String billNo;
     private String remarks;
-    private ProductResponseDto product;
+    private ProductRequestDto product;
 }
