@@ -162,38 +162,7 @@ The app will start at:
 
 **Endpoint:** `POST /api/daily-production`
 
-**Request Payload Example 1 (with master date and per-product dates):**
-
-```json
-{
-  "date": "2025-10-20",
-  "products": [
-    {
-      "product_id": 1,
-      "date": "2025-10-20",
-      "colour": "Red",
-      "unit": "kg",
-      "weight": 12.5,
-      "quantity": 100,
-      "type": "Finished",
-      "remark": "Morning batch"
-    },
-    {
-      "product_id": 2,
-      "date": "2025-10-19",
-      "colour": "Blue",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 250,
-      "type": "Semi-Finished",
-      "remark": "Yesterday’s pending lot"
-    }
-  ],
-  "remark": "Production for 20-Oct-2025"
-}
-```
-
-**Request Payload Example 2 (without master date, uses today's date):**
+**Request Payload Example 2: **
 
 ```json
 {
@@ -225,38 +194,40 @@ The app will start at:
 
 ```json
 {
-  "status": "success",
-  "message": "Daily production created",
-  "data": [
-    {
-      "id": 5,
-      "date": "2025-10-20",
-      "masterRemark": "Production for 20-Oct-2025",
-      "productId": 1,
-      "productName": "PVC Pipe",
-      "productDetailsId": 12,
-      "type": "Finished",
-      "colour": "Red",
-      "unit": "kg",
-      "weight": 12.5,
-      "quantity": 100,
-      "productRemark": "Morning batch"
-    },
-    {
-      "id": 5,
-      "date": "2025-10-19",
-      "masterRemark": "Production for 20-Oct-2025",
-      "productId": 2,
-      "productName": "Plastic Sheet",
-      "productDetailsId": 13,
-      "type": "Semi-Finished",
-      "colour": "Blue",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 250,
-      "productRemark": "Yesterday’s pending lot"
-    }
-  ]
+    "success": true,
+    "message": "Daily production created",
+    "data": [
+        {
+            "id": 2,
+            "date": "2025-10-20",
+            "masterRemark": "Production for 20-Oct-2025",
+            "moduleType": "PRODUCTION",
+            "productId": 1,
+            "productName": "PVC Pipe",
+            "productDetailsId": 3,
+            "type": "Finished",
+            "colour": "Red",
+            "unit": "kg",
+            "weight": 12.5,
+            "quantity": 100,
+            "productRemark": "Morning batch"
+        },
+        {
+            "id": 2,
+            "date": "2025-10-19",
+            "masterRemark": "Production for 20-Oct-2025",
+            "moduleType": "PRODUCTION",
+            "productId": 2,
+            "productName": "HDPE CRATE ACCESSORIES",
+            "productDetailsId": 4,
+            "type": "Semi-Finished",
+            "colour": "Blue",
+            "unit": "pcs",
+            "weight": 0,
+            "quantity": 250,
+            "productRemark": "Yesterday’s pending lot"
+        }
+    ]
 }
 ```
 
@@ -270,12 +241,13 @@ The app will start at:
     "message": "Daily production fetched",
     "data": [
         {
-            "id": 1,
+            "id": 2,
             "date": "2025-10-20",
             "masterRemark": "Production for 20-Oct-2025",
-            "productId": 4,
-            "productName": "HDPE CRATE ACCESSORIES",
-            "productDetailsId": 1,
+            "moduleType": "PRODUCTION",
+            "productId": 1,
+            "productName": "PVC Pipe",
+            "productDetailsId": 3,
             "type": "Finished",
             "colour": "Red",
             "unit": "kg",
@@ -284,12 +256,13 @@ The app will start at:
             "productRemark": "Morning batch"
         },
         {
-            "id": 1,
+            "id": 2,
             "date": "2025-10-19",
             "masterRemark": "Production for 20-Oct-2025",
-            "productId": 5,
-            "productName": "PVC Pipe",
-            "productDetailsId": 2,
+            "moduleType": "PRODUCTION",
+            "productId": 2,
+            "productName": "HDPE CRATE ACCESSORIES",
+            "productDetailsId": 4,
             "type": "Semi-Finished",
             "colour": "Blue",
             "unit": "pcs",
@@ -301,120 +274,7 @@ The app will start at:
 }
 
 ```
-
-### Create Daily Stock
-
-```json
-{
-  "date": "2025-09-15",
-  "productIds": [1,3,4,5],
-  "billNo": "BILL-2002",
-  "remarks": "Added to packaging materials section"
-}
-
-```
-
-### Get all Daily Stock List
-
-```
-localhost:8080/api/daily-stock
-```
-```json
-{
-    "success": true,
-    "message": "Daily stock fetched",
-    "data": [
-        {
-            "id": 1,
-            "date": "2025-09-15",
-            "billNo": "BILL-2001",
-            "remarks": "Fresh stock received from vendor",
-            "product": {
-                "id": 1,
-                "productName": "PP Bin Lid Clamp",
-                "colour": "Natural",
-                "type": "PP Bins Accessories",
-                "unit": "Piece",
-                "weight": "0.05 kg",
-                "quantity": "1000"
-            }
-        },
-        {
-            "id": 2,
-            "date": "2025-09-15",
-            "billNo": "BILL-2002",
-            "remarks": "Added to packaging materials section",
-            "product": {
-                "id": 4,
-                "productName": "Stretch Film Roll 20 micron",
-                "colour": "Transparent",
-                "type": "Rolls",
-                "unit": "Roll",
-                "weight": "1.5 kg",
-                "quantity": "300"
-            }
-        }
-    ]
-}
-
-```
-
-### Create Daily Sale
-
-```json
-{
-  "date": "2025-09-15",
-  "productIds":[1,3],
-  "billNo": "SALE-3001",
-  "remarks": "Sold 200 units to Client A"
-}
-
-```
-
-### Get all Daily Sale List
-
-```
-localhost:8080/api/daily-sale
-```
-```json
-{
-    "success": true,
-    "message": "Daily sale fetched",
-    "data": [
-        {
-            "id": 1,
-            "date": "2025-09-15",
-            "billNo": "SALE-3001",
-            "remarks": "Sold 200 units to Client A",
-            "product": {
-                "id": 2,
-                "productName": "HDPE Crate Handle Injection Mold",
-                "colour": "Black",
-                "type": "HDPE Crate Accessories",
-                "unit": "Pair",
-                "weight": "0.12 kg",
-                "quantity": "500"
-            }
-        },
-        {
-            "id": 2,
-            "date": "2025-09-15",
-            "billNo": "SALE-3002",
-            "remarks": "Delivered to Project Site B",
-            "product": {
-                "id": 5,
-                "productName": "PVC Wall Coving 50mm",
-                "colour": "White",
-                "type": "PVC Coving",
-                "unit": "Meter",
-                "weight": "0.4 kg",
-                "quantity": "1000"
-            }
-        }
-    ]
-}
-
-```
+  * Stock and sales will be the same as daily production.
 
 ---
 
