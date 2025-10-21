@@ -27,27 +27,26 @@ import lombok.Setter;
 @Table(name = "daily_production_master")
 public class DailyProductionMaster {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @Column(name = "date", nullable = false)
-    private LocalDate date;
+	@Column(name = "date", nullable = false)
+	private LocalDate date;
 
-    @Column(name = "remark")
-    private String remark;
+	@Column(name = "remark")
+	private String remark;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "dailyProductionMaster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductDetails> products = new ArrayList<>();
+	@Builder.Default
+	@OneToMany(mappedBy = "productionMaster", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<ProductDetails> products = new ArrayList<>();
 
-    public void addProductDetails(ProductDetails pd) {
-        pd.setDailyProductionMaster(this);
-        this.products.add(pd);
-    }
+	public void addProductDetails(ProductDetails pd) {
+		pd.setProductionMaster(this);
+		this.products.add(pd);
+	}
 
-    public void removeProductDetails(ProductDetails pd) {
-        this.products.remove(pd);
-        pd.setDailyProductionMaster(null);
-    }
+	public void removeProductDetails(ProductDetails pd) {
+		this.products.remove(pd);
+		pd.setProductionMaster(null);
+	}
 }

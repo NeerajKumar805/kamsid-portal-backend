@@ -3,13 +3,13 @@ package com.portal.kamsid.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.portal.kamsid.dto.DailyProductionRequestDto;
-import com.portal.kamsid.dto.DailyProductionResponseDto;
+import com.portal.kamsid.dto.DailyMasterRequestDto;
+import com.portal.kamsid.dto.DailyMasterResponseDto;
 
 public interface DailyProductionService {
-	List<DailyProductionResponseDto> create(DailyProductionRequestDto dto);
+	List<DailyMasterResponseDto> create(DailyMasterRequestDto dto);
 
-	List<DailyProductionResponseDto> getAll();
+	List<DailyMasterResponseDto> getAll();
 
-	List<DailyProductionResponseDto> getByDateRange(LocalDate start, LocalDate end);
+	List<DailyMasterResponseDto> getByDateRange(LocalDate start, LocalDate end);
 }

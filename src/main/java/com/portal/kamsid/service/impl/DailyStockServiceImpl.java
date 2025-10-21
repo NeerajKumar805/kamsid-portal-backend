@@ -3,33 +3,35 @@ package com.portal.kamsid.service.impl;
 import com.portal.kamsid.dto.DailyMasterRequestDto;
 import com.portal.kamsid.dto.DailyMasterResponseDto;
 import com.portal.kamsid.dto.ProductRequestDto;
-import com.portal.kamsid.entity.DailyProductionMaster;
+import com.portal.kamsid.dto.ProductResponseDto;
+import com.portal.kamsid.entity.DailyStockMaster;
+import com.portal.kamsid.entity.DailyStockMaster;
 import com.portal.kamsid.entity.Product;
 import com.portal.kamsid.entity.ProductDetails;
-import com.portal.kamsid.repository.DailyProductionRepository;
+import com.portal.kamsid.repository.DailyStockRepository;
 import com.portal.kamsid.repository.ProductRepository;
-import com.portal.kamsid.service.DailyProductionService;
+import com.portal.kamsid.service.DailyStockService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.stream.Collectors;
 import java.util.*;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class DailyProductionServiceImpl implements DailyProductionService {
+public class DailyStockServiceImpl implements DailyStockService {
 
-	private final DailyProductionRepository dailyRepo;
-	private final ProductRepository productRepo;
+    private final DailyStockRepository dailyStockRepo;
+    private final ProductRepository productRepo;
+    
+    private static final String MODULE = "PRODUCTION";
 
-	private static final String MODULE = "PRODUCTION";
-	
-	@Override
+    @Override
 	public List<DailyMasterResponseDto> create(DailyMasterRequestDto dto) {
 		// validate products list
 		List<ProductRequestDto> productDtos = Optional.ofNullable(dto.getProducts()).orElseGet(ArrayList::new);
@@ -59,7 +61,7 @@ public class DailyProductionServiceImpl implements DailyProductionService {
 		LocalDate masterDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
 		// create master
-		DailyProductionMaster master = DailyProductionMaster.builder().date(masterDate).remark(dto.getRemark()).build();
+		DailyStockMaster master = DailyStockMaster.builder().date(masterDate).remark(dto.getRemark()).build();
 
 		// build product details for each product DTO
 		for (ProductRequestDto pr : productDtos) {
@@ -79,36 +81,34 @@ public class DailyProductionServiceImpl implements DailyProductionService {
 		}
 
 		// save master (cascades ProductDetails)
-		DailyProductionMaster saved = dailyRepo.save(master);
+		DailyStockMaster saved = dailyStockRepo.save(master);
 
 		// return flat list of response DTOs (one per product row)
 		return saved.getProducts().stream().map(pd -> toDto(saved, pd, MODULE)).collect(Collectors.toList());
 	}
 
-	@Override
-	public List<DailyMasterResponseDto> getAll() {
-	    return dailyRepo.findAllWithProducts().stream()
-	        .flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE)))
-	        .collect(Collectors.toList());
-	}
+    @Override
+    public List<DailyMasterResponseDto> getAll() {
+        return dailyStockRepo.findAllWithProducts().stream()
+            .flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE)))
+            .collect(Collectors.toList());
+    }
 
-	@Override
-	public List<DailyMasterResponseDto> getByDateRange(LocalDate start, LocalDate end) {
-	    return dailyRepo.findByDateBetweenWithProducts(start, end).stream()
-	        .flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE)))
-	        .collect(Collectors.toList());
-	}
+    @Override
+    public List<DailyMasterResponseDto> getByDateRange(LocalDate start, LocalDate end) {
+        return dailyStockRepo.findByDateBetweenWithProducts(start, end).stream()
+            .flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE)))
+            .collect(Collectors.toList());
+    }
 
-	private DailyMasterResponseDto toDto(DailyProductionMaster d, ProductDetails pd, String module) {
-	    Product p = pd.getProduct();
-	    return DailyMasterResponseDto.builder()
-	        .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark())
-	        .moduleType(module)  // <-- set module here
-	        .productId(p.getPid()).productName(p.getProductName())
-	        .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())
-	        .unit(pd.getUnit()).weight(pd.getWeight()).quantity(pd.getQuantity())
-	        .productRemark(pd.getRemark()).build();
-	}
-
-
+    private DailyMasterResponseDto toDto(DailyStockMaster d, ProductDetails pd, String module) {
+        Product p = pd.getProduct();
+        return DailyMasterResponseDto.builder()
+            .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark())
+            .moduleType(module)
+            .productId(p.getPid()).productName(p.getProductName())
+            .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())
+            .unit(pd.getUnit()).weight(pd.getWeight()).quantity(pd.getQuantity())
+            .productRemark(pd.getRemark()).build();
+    }
 }

@@ -3,8 +3,21 @@ package com.portal.kamsid.entity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -12,34 +25,86 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Builder
-@Table(name = "product_details")
+@Table(name = "product_details", indexes = {
+		@Index(name = "idx_pd_production_master", columnList = "production_master_id"),
+		@Index(name = "idx_pd_sale_master", columnList = "sale_master_id"),
+		@Index(name = "idx_pd_stock_master", columnList = "stock_master_id") })
 public class ProductDetails {
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pdId")
-    private Long pdId;
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "pdId")
+	private Long pdId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "daily_production_master_id", nullable = false)
-    private DailyProductionMaster dailyProductionMaster;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "production_master_id")
+	private DailyProductionMaster productionMaster;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "sale_master_id")
+	private DailySaleMaster saleMaster;
 
-    @Column(name = "production_date", nullable = false)
-    private LocalDate date;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "stock_master_id")
+	private DailyStockMaster stockMaster;
 
-    private String colour;
-    private String type;
-    private String unit;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "product_id", nullable = false)
+	private Product product;
 
-    @Column(precision = 19, scale = 4)
-    private BigDecimal weight;
+	@Column(name = "production_date", nullable = false)
+	private LocalDate date;
 
-    @Column(precision = 19, scale = 4)
-    private BigDecimal quantity;
+	private String colour;
+	private String type;
+	private String unit;
 
-    @Column(name = "remark")
-    private String remark;
+	@Column(precision = 19, scale = 4)
+	private BigDecimal weight;
+
+	@Column(precision = 19, scale = 4)
+	private BigDecimal quantity;
+
+	@Column(name = "remark")
+	private String remark;
+
+	public void assignToProduction(DailyProductionMaster master) {
+		clearParents();
+		this.productionMaster = master;
+		if (master != null && !master.getProducts().contains(this)) {
+			master.getProducts().add(this);
+		}
+	}
+
+	public void assignToSale(DailySaleMaster master) {
+		clearParents();
+		this.saleMaster = master;
+		if (master != null && !master.getProducts().contains(this)) {
+			master.getProducts().add(this);
+		}
+	}
+
+	public void assignToStock(DailyStockMaster master) {
+		clearParents();
+		this.stockMaster = master;
+		if (master != null && !master.getProducts().contains(this)) {
+			master.getProducts().add(this);
+		}
+	}
+
+	private void clearParents() {
+		this.productionMaster = null;
+		this.saleMaster = null;
+		this.stockMaster = null;
+	}
+
+	public boolean hasExactlyOneParent() {
+		int count = 0;
+		if (productionMaster != null)
+			count++;
+		if (saleMaster != null)
+			count++;
+		if (stockMaster != null)
+			count++;
+		return count == 1;
+	}
 }

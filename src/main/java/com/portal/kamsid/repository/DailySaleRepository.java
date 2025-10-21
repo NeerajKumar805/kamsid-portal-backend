@@ -1,11 +1,21 @@
 package com.portal.kamsid.repository;
 
-import com.portal.kamsid.entity.DailySaleMaster;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+
+import com.portal.kamsid.entity.DailySaleMaster;
+
 public interface DailySaleRepository extends JpaRepository<DailySaleMaster, Long> {
     List<DailySaleMaster> findByDateBetween(LocalDate start, LocalDate end);
+    
+    @Query("select distinct d from DailySaleMaster d " + "left join fetch d.products pd "
+			+ "left join fetch pd.product p")
+	List<DailySaleMaster> findAllWithProducts();
+
+	@Query("select distinct d from DailySaleMaster d " + "left join fetch d.products pd "
+			+ "left join fetch pd.product p " + "where d.date between :start and :end")
+	List<DailySaleMaster> findByDateBetweenWithProducts(LocalDate start, LocalDate end);
 }
