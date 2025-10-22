@@ -30,4 +30,5 @@ public class ProductRequestDto {
 
     private String type;
     private String remark;
+    private String billNo;
 }

@@ -66,6 +66,9 @@ public class ProductDetails {
 
 	@Column(name = "remark")
 	private String remark;
+	
+	@Column(name = "bill_no")
+	private String billNo;
 
 	public void assignToProduction(DailyProductionMaster master) {
 		clearParents();

@@ -62,7 +62,7 @@ public class DailySaleServiceImpl implements DailySaleService {
             ProductDetails pd = ProductDetails.builder()
                     .product(product).date(rowDate).colour(pr.getColour())
                     .type(pr.getType()).unit(pr.getUnit()).weight(pr.getWeight())
-                    .quantity(pr.getQuantity()).remark(pr.getRemark()).build();
+                    .quantity(pr.getQuantity()).remark(pr.getRemark()).billNo(pr.getBillNo()).build();
 
             // Important: use master.addProductDetails -> this will set saleMaster in ProductDetails
             master.addProductDetails(pd);
@@ -81,7 +81,7 @@ public class DailySaleServiceImpl implements DailySaleService {
                 .productId(p.getPid()).productName(p.getProductName())
                 .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())
                 .unit(pd.getUnit()).weight(pd.getWeight()).quantity(pd.getQuantity())
-                .productRemark(pd.getRemark()).build();
+                .productRemark(pd.getRemark()).billNo(pd.getBillNo()).build();
     }
 
 	@Override
