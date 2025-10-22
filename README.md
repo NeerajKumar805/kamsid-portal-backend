@@ -153,16 +153,16 @@ The app will start at:
   }
 }
 ```
-
 ---
 
 ## 2. Daily Production API
 
 ### 2.1 Create Daily Production
 
-**Endpoint:** `POST /api/daily-production`
+**Endpoint:**
+`POST /api/daily-production`
 
-**Request Payload Example 2: **
+**Request Payload Example:**
 
 ```json
 {
@@ -194,88 +194,320 @@ The app will start at:
 
 ```json
 {
-    "success": true,
-    "message": "Daily production created",
-    "data": [
-        {
-            "id": 2,
-            "date": "2025-10-20",
-            "masterRemark": "Production for 20-Oct-2025",
-            "moduleType": "PRODUCTION",
-            "productId": 1,
-            "productName": "PVC Pipe",
-            "productDetailsId": 3,
-            "type": "Finished",
-            "colour": "Red",
-            "unit": "kg",
-            "weight": 12.5,
-            "quantity": 100,
-            "productRemark": "Morning batch"
-        },
-        {
-            "id": 2,
-            "date": "2025-10-19",
-            "masterRemark": "Production for 20-Oct-2025",
-            "moduleType": "PRODUCTION",
-            "productId": 2,
-            "productName": "HDPE CRATE ACCESSORIES",
-            "productDetailsId": 4,
-            "type": "Semi-Finished",
-            "colour": "Blue",
-            "unit": "pcs",
-            "weight": 0,
-            "quantity": 250,
-            "productRemark": "Yesterday’s pending lot"
-        }
-    ]
+  "success": true,
+  "message": "Daily production created",
+  "data": [
+    {
+      "id": 2,
+      "date": "2025-10-22",
+      "masterRemark": "Production for 22-Oct-2025",
+      "moduleType": "PRODUCTION",
+      "productId": 1,
+      "productName": "PVC Pipe",
+      "productDetailsId": 3,
+      "type": "Finished",
+      "colour": "White",
+      "unit": "kg",
+      "weight": 8.5,
+      "quantity": 75,
+      "productRemark": "Afternoon run",
+      "billNo": null
+    },
+    {
+      "id": 2,
+      "date": "2025-10-22",
+      "masterRemark": "Production for 22-Oct-2025",
+      "moduleType": "PRODUCTION",
+      "productId": 3,
+      "productName": "Green Cap",
+      "productDetailsId": 4,
+      "type": "Finished",
+      "colour": "Green",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 120,
+      "productRemark": "Special order",
+      "billNo": null
+    }
+  ]
 }
 ```
 
-### 2.2 Get Daily Production
+### 2.2 Get Daily Production by Date Range
 
-**Endpoint:** `GET /api/daily-production?start=yyyy-MM-dd&end=yyyy-MM-dd`
+**Endpoint:**
+`GET /api/daily-production?start=2025-10-20&end=2025-10-22`
 
-```
+**Response Payload:**
+
+```json
 {
-    "success": true,
-    "message": "Daily production fetched",
-    "data": [
-        {
-            "id": 2,
-            "date": "2025-10-20",
-            "masterRemark": "Production for 20-Oct-2025",
-            "moduleType": "PRODUCTION",
-            "productId": 1,
-            "productName": "PVC Pipe",
-            "productDetailsId": 3,
-            "type": "Finished",
-            "colour": "Red",
-            "unit": "kg",
-            "weight": 12.5000,
-            "quantity": 100.0000,
-            "productRemark": "Morning batch"
-        },
-        {
-            "id": 2,
-            "date": "2025-10-19",
-            "masterRemark": "Production for 20-Oct-2025",
-            "moduleType": "PRODUCTION",
-            "productId": 2,
-            "productName": "HDPE CRATE ACCESSORIES",
-            "productDetailsId": 4,
-            "type": "Semi-Finished",
-            "colour": "Blue",
-            "unit": "pcs",
-            "weight": 0.0000,
-            "quantity": 250.0000,
-            "productRemark": "Yesterday’s pending lot"
-        }
-    ]
+  "success": true,
+  "message": "Daily production fetched",
+  "data": [
+    {
+      "id": 2,
+      "date": "2025-10-22",
+      "masterRemark": "Production for 22-Oct-2025",
+      "moduleType": "PRODUCTION",
+      "productId": 1,
+      "productName": "PVC Pipe",
+      "productDetailsId": 3,
+      "type": "Finished",
+      "colour": "White",
+      "unit": "kg",
+      "weight": 8.5,
+      "quantity": 75,
+      "productRemark": "Afternoon run",
+      "billNo": null
+    },
+    {
+      "id": 1,
+      "date": "2025-10-21",
+      "masterRemark": "Production for 21-Oct-2025",
+      "moduleType": "PRODUCTION",
+      "productId": 2,
+      "productName": "HDPE Crate",
+      "productDetailsId": 2,
+      "type": "Semi-Finished",
+      "colour": "Blue",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 200,
+      "productRemark": "Evening batch",
+      "billNo": null
+    }
+  ]
 }
-
 ```
-  * Stock and sales will be the same as daily production.
 
+---
+
+## 3. Daily Sale API
+
+### 3.1 Create Daily Sale
+
+**Endpoint:**
+`POST /api/daily-sale`
+
+**Request Payload Example:**
+
+```json
+{
+  "products": [
+    {
+      "product_id": 5,
+      "colour": "Black",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 50,
+      "type": "Retail",
+      "remark": "Local shop delivery",
+      "billNo": "SALE-2025-120"
+    },
+    {
+      "product_id": 2,
+      "colour": "Blue",
+      "unit": "kg",
+      "weight": 25.5,
+      "quantity": 30,
+      "type": "Wholesale",
+      "remark": "Bulk order",
+      "billNo": "SALE-2025-121"
+    }
+  ],
+  "remark": "Sales completed"
+}
+```
+
+**Response Payload:**
+
+```json
+{
+  "success": true,
+  "message": "Daily sale created",
+  "data": [
+    {
+      "id": 7,
+      "date": "2025-10-22",
+      "masterRemark": "Sales entry for 22-Oct-2025",
+      "moduleType": "SALE",
+      "productId": 5,
+      "productName": "Plastic Bottle",
+      "productDetailsId": 9,
+      "type": "Retail",
+      "colour": "Black",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 50,
+      "productRemark": "Local shop delivery",
+      "billNo": "SALE-2025-120"
+    },
+    {
+      "id": 7,
+      "date": "2025-10-22",
+      "masterRemark": "Sales entry for 22-Oct-2025",
+      "moduleType": "SALE",
+      "productId": 2,
+      "productName": "PVC Rod",
+      "productDetailsId": 10,
+      "type": "Wholesale",
+      "colour": "Blue",
+      "unit": "kg",
+      "weight": 25.5,
+      "quantity": 30,
+      "productRemark": "Bulk order",
+      "billNo": "SALE-2025-121"
+    }
+  ]
+}
+```
+
+### 3.2 Get Daily Sale by Date Range
+
+**Endpoint:**
+`GET /api/daily-sale?start=2025-10-20&end=2025-10-22`
+
+**Response Payload:**
+
+```json
+{
+  "success": true,
+  "message": "Daily sale fetched",
+  "data": [
+    {
+      "id": 7,
+      "date": "2025-10-22",
+      "masterRemark": "Sales entry for 22-Oct-2025",
+      "moduleType": "SALE",
+      "productId": 5,
+      "productName": "Plastic Bottle",
+      "productDetailsId": 9,
+      "type": "Retail",
+      "colour": "Black",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 50,
+      "productRemark": "Local shop delivery",
+      "billNo": "SALE-2025-120"
+    }
+  ]
+}
+```
+
+---
+
+## 4. Daily Stock API
+
+### 4.1 Create Daily Stock
+
+**Endpoint:**
+`POST /api/daily-stock`
+
+**Request Payload Example:**
+
+```json
+{
+  "products": [
+    {
+      "product_id": 1,
+      "colour": "White",
+      "unit": "kg",
+      "weight": 12.5,
+      "quantity": 200,
+      "type": "Opening Stock",
+      "remark": "Morning count",
+      "billNo": "STOCK-2025-010"
+    },
+    {
+      "product_id": 3,
+      "colour": "Green",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 500,
+      "type": "Closing Stock",
+      "remark": "End of day",
+      "billNo": "STOCK-2025-011"
+    }
+  ],
+  "remark": "Stock update for today"
+}
+```
+
+**Response Payload:**
+
+```json
+{
+  "success": true,
+  "message": "Daily stock created",
+  "data": [
+    {
+      "id": 11,
+      "date": "2025-10-22",
+      "masterRemark": "Stock entry for 22-Oct-2025",
+      "moduleType": "STOCK",
+      "productId": 1,
+      "productName": "PVC Pipe",
+      "productDetailsId": 12,
+      "type": "Opening Stock",
+      "colour": "White",
+      "unit": "kg",
+      "weight": 12.5,
+      "quantity": 200,
+      "productRemark": "Morning count",
+      "billNo": "STOCK-2025-010"
+    },
+    {
+      "id": 11,
+      "date": "2025-10-22",
+      "masterRemark": "Stock entry for 22-Oct-2025",
+      "moduleType": "STOCK",
+      "productId": 3,
+      "productName": "Green Cap",
+      "productDetailsId": 13,
+      "type": "Closing Stock",
+      "colour": "Green",
+      "unit": "pcs",
+      "weight": 0,
+      "quantity": 500,
+      "productRemark": "End of day",
+      "billNo": "STOCK-2025-011"
+    }
+  ]
+}
+```
+
+### 4.2 Get Daily Stock by Date Range
+
+**Endpoint:**
+`GET /api/daily-stock?start=2025-10-20&end=2025-10-22`
+
+**Response Payload:**
+
+```json
+{
+  "success": true,
+  "message": "Daily stock fetched",
+  "data": [
+    {
+      "id": 11,
+      "date": "2025-10-22",
+      "masterRemark": "Stock entry for 22-Oct-2025",
+      "moduleType": "STOCK",
+      "productId": 1,
+      "productName": "PVC Pipe",
+      "productDetailsId": 12,
+      "type": "Opening Stock",
+      "colour": "White",
+      "unit": "kg",
+      "weight": 12.5,
+      "quantity": 200,
+      "productRemark": "Morning count",
+      "billNo": "STOCK-2025-010"
+    }
+  ]
+}
+```
 ---
 
 ## Notes
