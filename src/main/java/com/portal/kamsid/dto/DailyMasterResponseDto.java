@@ -15,6 +15,7 @@ public class DailyMasterResponseDto {
 	private Long id;
     private LocalDate date;
     private String masterRemark;
+    private String masterBillNo;
     private String moduleType; // "PRODUCTION" | "SALE" | "STOCK" (optional)
 
     private Long productId;

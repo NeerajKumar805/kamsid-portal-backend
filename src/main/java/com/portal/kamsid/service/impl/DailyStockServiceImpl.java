@@ -104,7 +104,7 @@ public class DailyStockServiceImpl implements DailyStockService {
     private DailyMasterResponseDto toDto(DailyStockMaster d, ProductDetails pd, String module) {
         Product p = pd.getProduct();
         return DailyMasterResponseDto.builder()
-            .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark()).billNo(d.getBillNo())
+            .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark()).masterBillNo(d.getBillNo())
             .moduleType(module)
             .productId(p.getPid()).productName(p.getProductName())
             .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())
