@@ -34,6 +34,9 @@ public class DailySaleMaster {
 	@Column(name = "remark")
 	private String remark;
 
+	@Column(name = "bill_no")
+	private String billNo;
+	
 	@Builder.Default
 	@OneToMany(mappedBy = "saleMaster", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<ProductDetails> products = new ArrayList<>();

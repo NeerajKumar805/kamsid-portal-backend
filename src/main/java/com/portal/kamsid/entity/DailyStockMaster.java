@@ -33,6 +33,9 @@ public class DailyStockMaster {
 
 	@Column(name = "remark")
 	private String remark;
+	
+	@Column(name = "bill_no")
+	private String billNo;
 
 	@Builder.Default
 	@OneToMany(mappedBy = "stockMaster", cascade = CascadeType.ALL, orphanRemoval = true)

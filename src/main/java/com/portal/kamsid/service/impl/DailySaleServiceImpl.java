@@ -33,6 +33,8 @@ public class DailySaleServiceImpl implements DailySaleService {
 
 	private final DailySaleRepository dailySaleRepo;
 	private final ProductRepository productRepo;
+	
+	private static final String MODULE = "SALE";
 
 	@Override
     public List<DailyMasterResponseDto> create(DailyMasterRequestDto dto) {
@@ -53,7 +55,7 @@ public class DailySaleServiceImpl implements DailySaleService {
 
         LocalDate masterDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-        DailySaleMaster master = DailySaleMaster.builder().date(masterDate).remark(dto.getRemark()).build();
+        DailySaleMaster master = DailySaleMaster.builder().date(masterDate).remark(dto.getRemark()).billNo(dto.getBillNo()).build();
 
         for (ProductRequestDto pr : productDtos) {
             Product product = idToProduct.get(pr.getProductId());
@@ -70,13 +72,13 @@ public class DailySaleServiceImpl implements DailySaleService {
 
         DailySaleMaster saved = dailySaleRepo.save(master);
 
-        return saved.getProducts().stream().map(pd -> toDto(saved, pd, "SALE")).collect(Collectors.toList());
+        return saved.getProducts().stream().map(pd -> toDto(saved, pd, MODULE)).collect(Collectors.toList());
     }
 
     private DailyMasterResponseDto toDto(DailySaleMaster d, ProductDetails pd, String module) {
         Product p = pd.getProduct();
         return DailyMasterResponseDto.builder()
-                .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark())
+                .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark()).billNo(d.getBillNo())
                 .moduleType(module)
                 .productId(p.getPid()).productName(p.getProductName())
                 .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())
@@ -86,13 +88,13 @@ public class DailySaleServiceImpl implements DailySaleService {
 
 	@Override
 	public List<DailyMasterResponseDto> getAll() {
-		return dailySaleRepo.findAll().stream().flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, "SALE")))
+		return dailySaleRepo.findAll().stream().flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE)))
 				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<DailyMasterResponseDto> getByDateRange(LocalDate start, LocalDate end) {
-		return dailySaleRepo.findByDateBetween(start, end).stream()
-				.flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, "SALE"))).collect(Collectors.toList());
+		return dailySaleRepo.findByDateBetweenWithProducts(start, end).stream()
+				.flatMap(d -> d.getProducts().stream().map(pd -> toDto(d, pd, MODULE))).collect(Collectors.toList());
 	}
 }

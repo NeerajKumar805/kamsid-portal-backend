@@ -29,7 +29,7 @@ public class DailyStockServiceImpl implements DailyStockService {
     private final DailyStockRepository dailyStockRepo;
     private final ProductRepository productRepo;
     
-    private static final String MODULE = "PRODUCTION";
+    private static final String MODULE = "STOCK";
 
     @Override
 	public List<DailyMasterResponseDto> create(DailyMasterRequestDto dto) {
@@ -61,7 +61,7 @@ public class DailyStockServiceImpl implements DailyStockService {
 		LocalDate masterDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
 		// create master
-		DailyStockMaster master = DailyStockMaster.builder().date(masterDate).remark(dto.getRemark()).build();
+		DailyStockMaster master = DailyStockMaster.builder().date(masterDate).remark(dto.getRemark()).billNo(dto.getBillNo()).build();
 
 		// build product details for each product DTO
 		for (ProductRequestDto pr : productDtos) {
@@ -104,7 +104,7 @@ public class DailyStockServiceImpl implements DailyStockService {
     private DailyMasterResponseDto toDto(DailyStockMaster d, ProductDetails pd, String module) {
         Product p = pd.getProduct();
         return DailyMasterResponseDto.builder()
-            .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark())
+            .id(d.getId()).date(pd.getDate()).masterRemark(d.getRemark()).billNo(d.getBillNo())
             .moduleType(module)
             .productId(p.getPid()).productName(p.getProductName())
             .productDetailsId(pd.getPdId()).type(pd.getType()).colour(pd.getColour())

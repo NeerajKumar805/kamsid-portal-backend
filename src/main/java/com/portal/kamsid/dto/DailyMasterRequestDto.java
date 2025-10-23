@@ -15,4 +15,5 @@ public class DailyMasterRequestDto {
 	@Valid
 	private List<ProductRequestDto> products;
 	private String remark;
+	private String billNo;
 }
