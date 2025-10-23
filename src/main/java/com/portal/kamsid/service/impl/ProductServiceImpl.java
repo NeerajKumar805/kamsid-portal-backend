@@ -1,5 +1,7 @@
 package com.portal.kamsid.service.impl;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -28,16 +30,18 @@ public class ProductServiceImpl implements ProductService {
 		if (repo.existsByProductNameIgnoreCase(name)) {
 			throw new IllegalArgumentException("Product with name '" + name + "' already exists");
 		}
+		
+		LocalDate createdDate = LocalDate.now(ZoneId.of("Asia/Kolkata"));
 
-		Product saved = repo.save(Product.builder().productName(name).build());
+		Product saved = repo.save(Product.builder().productName(name).createdDate(createdDate).build());
 
-		return ProductResponseDto.builder().id(saved.getPid()).productName(saved.getProductName()).build();
+		return ProductResponseDto.builder().id(saved.getPid()).productName(saved.getProductName()).createdDate(saved.getCreatedDate()).build();
 	}
 
 	@Override
 	public List<ProductResponseDto> getAll() {
 		return repo.findAll().stream()
-				.map(p -> ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).build())
+				.map(p -> ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).createdDate(p.getCreatedDate()).build())
 				.collect(Collectors.toList());
 	}
 
@@ -46,6 +50,6 @@ public class ProductServiceImpl implements ProductService {
 		Product p = repo.findById(id)
 				.orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + id));
 
-		return ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).build();
+		return ProductResponseDto.builder().id(p.getPid()).productName(p.getProductName()).createdDate(p.getCreatedDate()).build();
 	}
 }

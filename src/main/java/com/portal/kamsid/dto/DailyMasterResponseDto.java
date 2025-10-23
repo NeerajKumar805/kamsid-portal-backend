@@ -28,5 +28,4 @@ public class DailyMasterResponseDto {
     private BigDecimal weight;
     private BigDecimal quantity;
     private String productRemark;
-    private String billNo;
 }

@@ -1,7 +1,13 @@
 package com.portal.kamsid.dto;
 
+import java.time.LocalDate;
+
 import jakarta.validation.constraints.NotBlank;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
@@ -14,4 +20,7 @@ public class ProductResponseDto {
 
 	@NotBlank
 	private String productName;
+
+	private LocalDate createdDate;
+
 }

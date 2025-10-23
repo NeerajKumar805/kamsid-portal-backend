@@ -42,6 +42,6 @@ public class ProductController {
 	@GetMapping("/{id}")
 	public ResponseEntity<ApiResponse<ProductResponseDto>> getById(@PathVariable Long id) {
 		ProductResponseDto dto = service.getById(id);
-		return ResponseEntity.ok(ApiResponse.success("Product fetched", dto));
+		return ResponseEntity.ok(ApiResponse.success("Product fetched with id: "+id, dto));
 	}
 }
