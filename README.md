@@ -2,7 +2,7 @@
 # Kamsid Portal Backend
 
 This is a Spring Boot backend for **Kamsid Portal**, built with Maven and PostgreSQL.  
-It manages products and daily production entries with a clean layered architecture.  
+It manages products and daily production, stock & sales entries with a clean layered architecture.  
 Standardized API responses and DTOs are used across endpoints.
 
 ---
@@ -109,7 +109,8 @@ The app will start at:
   "message": "Product created",
   "data": {
     "id": 1,
-    "productName": "PVC Pipe"
+    "productName": "PVC Pipe",
+    "createdDate": "2025-10-23"
   }
 }
 ```
@@ -127,11 +128,13 @@ The app will start at:
   "data": [
     {
       "id": 1,
-      "productName": "PVC Pipe"
+      "productName": "PVC Pipe",
+      "createdDate": "2025-10-23"
     },
     {
       "id": 2,
-      "productName": "Plastic Sheet"
+      "productName": "Plastic Sheet",
+      "createdDate": "2025-10-22"
     }
   ]
 }
@@ -149,7 +152,8 @@ The app will start at:
   "message": "Product fetched",
   "data": {
     "id": 1,
-    "productName": "PVC Pipe"
+    "productName": "PVC Pipe",
+    "createdDate": "2025-10-23"
   }
 }
 ```
@@ -210,8 +214,7 @@ The app will start at:
       "unit": "kg",
       "weight": 8.5,
       "quantity": 75,
-      "productRemark": "Afternoon run",
-      "billNo": null
+      "productRemark": "Afternoon run"
     },
     {
       "id": 2,
@@ -226,8 +229,7 @@ The app will start at:
       "unit": "pcs",
       "weight": 0,
       "quantity": 120,
-      "productRemark": "Special order",
-      "billNo": null
+      "productRemark": "Special order"
     }
   ]
 }
@@ -249,6 +251,7 @@ The app will start at:
       "id": 2,
       "date": "2025-10-22",
       "masterRemark": "Production for 22-Oct-2025",
+      "masterBillNo": 123,
       "moduleType": "PRODUCTION",
       "productId": 1,
       "productName": "PVC Pipe",
@@ -258,13 +261,13 @@ The app will start at:
       "unit": "kg",
       "weight": 8.5,
       "quantity": 75,
-      "productRemark": "Afternoon run",
-      "billNo": null
+      "productRemark": "Afternoon run"
     },
     {
       "id": 1,
       "date": "2025-10-21",
       "masterRemark": "Production for 21-Oct-2025",
+      "masterBillNo": 123,
       "moduleType": "PRODUCTION",
       "productId": 2,
       "productName": "HDPE Crate",
@@ -274,8 +277,7 @@ The app will start at:
       "unit": "pcs",
       "weight": 0,
       "quantity": 200,
-      "productRemark": "Evening batch",
-      "billNo": null
+      "productRemark": "Evening batch"
     }
   ]
 }
@@ -302,8 +304,7 @@ The app will start at:
       "weight": 0,
       "quantity": 50,
       "type": "Retail",
-      "remark": "Local shop delivery",
-      "billNo": "SALE-2025-120"
+      "remark": "Local shop delivery"
     },
     {
       "product_id": 2,
@@ -312,11 +313,11 @@ The app will start at:
       "weight": 25.5,
       "quantity": 30,
       "type": "Wholesale",
-      "remark": "Bulk order",
-      "billNo": "SALE-2025-121"
+      "remark": "Bulk order"
     }
   ],
-  "remark": "Sales completed"
+  "remark": "Sales completed",
+  "billNo": "SALE-2025-120"
 }
 ```
 
@@ -341,7 +342,7 @@ The app will start at:
       "weight": 0,
       "quantity": 50,
       "productRemark": "Local shop delivery",
-      "billNo": "SALE-2025-120"
+      "masterBillNo": "SALE-2025-120"
     },
     {
       "id": 7,
@@ -357,7 +358,7 @@ The app will start at:
       "weight": 25.5,
       "quantity": 30,
       "productRemark": "Bulk order",
-      "billNo": "SALE-2025-121"
+      "masterBillNo": "SALE-2025-121"
     }
   ]
 }
@@ -416,8 +417,7 @@ The app will start at:
       "weight": 12.5,
       "quantity": 200,
       "type": "Opening Stock",
-      "remark": "Morning count",
-      "billNo": "STOCK-2025-010"
+      "remark": "Morning count"
     },
     {
       "product_id": 3,
@@ -426,11 +426,11 @@ The app will start at:
       "weight": 0,
       "quantity": 500,
       "type": "Closing Stock",
-      "remark": "End of day",
-      "billNo": "STOCK-2025-011"
+      "remark": "End of day"
     }
   ],
-  "remark": "Stock update for today"
+  "remark": "Stock update for today",
+  "billNo": "STOCK-2025-010"
 }
 ```
 
