@@ -1,519 +1,194 @@
-
 # Kamsid Portal Backend
 
-This is a Spring Boot backend for **Kamsid Portal**, built with Maven and PostgreSQL.  
-It manages products and daily production, stock & sales entries with a clean layered architecture.  
-Standardized API responses and DTOs are used across endpoints.
+Production and sale automatically update inventory. Use these endpoints and DTO shapes directly.
 
 ---
 
-## Tech Stack
-- Java 21+
-- Spring Boot 3.x
-- Spring Data JPA
-- PostgreSQL
-- Maven
+## Tech
+
+* Java 21+, Spring Boot 3.x, Spring Data JPA, PostgreSQL, Maven
 
 ---
 
-## Project Structure
-```
+## Key behavior (must-know)
 
-com.portal.kamsid
-├── controller        # REST Controllers
-├── dto               # DTOs for requests/responses
-├── entity            # JPA entities
-├── repository        # Spring Data JPA repositories
-├── service           # Business logic layer
-├── util              # Utility classes
-└── exception         # Global exception handler
+* Inventory is the source of truth (`ProductInventory`).
+* Every change writes an audit `StockEntry`.
 
-````
----
-
-## API Endpoints Examples
-
-| Method | Endpoint                  | Description                      |
-|--------|---------------------------|----------------------------------|
-| POST   | `/api/products`           | Create a product                 |
-| GET    | `/api/products`           | Get all products                 |
-| GET    | `/api/products/{id}`      | Get a product by ID              |
-| POST   | `/api/daily-production`   | Create a daily production record |
-| GET    | `/api/daily-production`   | Get all daily productions        |
-
-All responses are wrapped in a **standard `ApiResponse`**:
-```json
-{
-  "success": true,
-  "message": "Products fetched successfully",
-  "data": [...]
-}
-````
+  * Production → inventory IN
+  * Sale → inventory OUT
+  * Manual stock (purchase) → inventory IN
+* Stock update runs inside the same transaction as the master save. If stock update fails (e.g., insufficient stock), the whole request rolls back.
+* Global history endpoint: `GET /api/inventory/history`
+* Product-specific history: `GET /api/inventory/{productId}/entries`
 
 ---
 
-## Setup Instructions
+## API summary (important endpoints)
 
-### 1. Clone the Repository
+| Method |                             Endpoint | Purpose                                              |
+| ------ | -----------------------------------: | ---------------------------------------------------- |
+| POST   |                      `/api/products` | Create product                                       |
+| GET    |                      `/api/products` | List products                                        |
+| POST   |              `/api/daily-production` | Create production (updates inventory IN)             |
+| GET    |              `/api/daily-production` | List/Query production                                |
+| POST   |                    `/api/daily-sale` | Create sale (updates inventory OUT)                  |
+| GET    |                    `/api/daily-sale` | List/Query sales                                     |
+| POST   |                   `/api/daily-stock` | Manual stock/purchase (updates inventory IN)         |
+| GET    |                   `/api/daily-stock` | List/Query manual stock                              |
+| GET    |                     `/api/inventory` | List current inventory                               |
+| GET    |         `/api/inventory/{productId}` | Inventory for product                                |
+| GET    |             `/api/inventory/history` | Global stock history (filters)                       |
+| GET    | `/api/inventory/{productId}/entries` | History for product                                  |
+| POST   |       `/api/inventory/admin/rebuild` | Admin: rebuild inventory from history (protect this) |
 
-```bash
-git clone https://github.com/NeerajKumar805/kamsid-portal-backend.git
-cd kamsid-portal-backend
-```
-
-### 2. Configure PostgreSQL
-
-Create a database in PostgreSQL (`kamsid_portal`) and update `src/main/resources/application.properties`:
-
-```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/kamsid_portal
-spring.datasource.username=postgres
-spring.datasource.password=your_password
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.show-sql=true
-```
-
-### 3. Build and Run
-
-```bash
-mvn clean install
-mvn spring-boot:run
-```
-
-The app will start at:
-👉 `http://localhost:8080`
-
----
-
-## Example Payloads
-
-## 1. Product API
-
-### 1.1 Create Product
-
-**Endpoint:** `POST /api/products`
-
-**Request Payload:**
+All responses use `ApiResponse<T>`:
 
 ```json
-{
-  "productName": "PVC Pipe"
-}
+{ "success": true|false, "message": "...", "data": <T|null> }
 ```
 
-**Response Payload:**
-
-```json
-{
-  "status": "success",
-  "message": "Product created",
-  "data": {
-    "id": 1,
-    "productName": "PVC Pipe",
-    "createdDate": "2025-10-23"
-  }
-}
-```
-
-### 1.2 Get All Products
-
-**Endpoint:** `GET /api/products`
-
-**Response Payload:**
-
-```json
-{
-  "status": "success",
-  "message": "Products fetched",
-  "data": [
-    {
-      "id": 1,
-      "productName": "PVC Pipe",
-      "createdDate": "2025-10-23"
-    },
-    {
-      "id": 2,
-      "productName": "Plastic Sheet",
-      "createdDate": "2025-10-22"
-    }
-  ]
-}
-```
-
-### 1.3 Get Product by ID
-
-**Endpoint:** `GET /api/products/{id}`
-
-**Response Payload:**
-
-```json
-{
-  "status": "success",
-  "message": "Product fetched",
-  "data": {
-    "id": 1,
-    "productName": "PVC Pipe",
-    "createdDate": "2025-10-23"
-  }
-}
-```
 ---
 
-## 2. Daily Production API
+## Example payloads (short)
 
-### 2.1 Create Daily Production
+### Create Product
 
-**Endpoint:**
+`POST /api/products`
+
+```json
+{ "productName": "PVC Pipe" }
+```
+
+### Create Production
+
 `POST /api/daily-production`
 
-**Request Payload Example:**
-
 ```json
 {
   "products": [
-    {
-      "product_id": 1,
-      "colour": "White",
-      "unit": "kg",
-      "weight": 8.5,
-      "quantity": 75,
-      "type": "Finished",
-      "remark": "Afternoon run"
-    },
-    {
-      "product_id": 3,
-      "colour": "Green",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 120,
-      "type": "Finished",
-      "remark": "Special order"
-    }
+    { "product_id": 1, "unit": "kg", "quantity": 75, "type": "Finished", "remark": "Afternoon run" }
   ],
-  "remark": "Auto-date master (today’s entry)"
+  "remark": "today's run"
 }
 ```
 
-**Response Payload:**
+### Create Sale
 
-```json
-{
-  "success": true,
-  "message": "Daily production created",
-  "data": [
-    {
-      "id": 2,
-      "date": "2025-10-22",
-      "masterRemark": "Production for 22-Oct-2025",
-      "moduleType": "PRODUCTION",
-      "productId": 1,
-      "productName": "PVC Pipe",
-      "productDetailsId": 3,
-      "type": "Finished",
-      "colour": "White",
-      "unit": "kg",
-      "weight": 8.5,
-      "quantity": 75,
-      "productRemark": "Afternoon run"
-    },
-    {
-      "id": 2,
-      "date": "2025-10-22",
-      "masterRemark": "Production for 22-Oct-2025",
-      "moduleType": "PRODUCTION",
-      "productId": 3,
-      "productName": "Green Cap",
-      "productDetailsId": 4,
-      "type": "Finished",
-      "colour": "Green",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 120,
-      "productRemark": "Special order"
-    }
-  ]
-}
-```
-
-### 2.2 Get Daily Production by Date Range
-
-**Endpoint:**
-`GET /api/daily-production?start=2025-10-20&end=2025-10-22`
-
-**Response Payload:**
-
-```json
-{
-  "success": true,
-  "message": "Daily production fetched",
-  "data": [
-    {
-      "id": 2,
-      "date": "2025-10-22",
-      "masterRemark": "Production for 22-Oct-2025",
-      "masterBillNo": 123,
-      "moduleType": "PRODUCTION",
-      "productId": 1,
-      "productName": "PVC Pipe",
-      "productDetailsId": 3,
-      "type": "Finished",
-      "colour": "White",
-      "unit": "kg",
-      "weight": 8.5,
-      "quantity": 75,
-      "productRemark": "Afternoon run"
-    },
-    {
-      "id": 1,
-      "date": "2025-10-21",
-      "masterRemark": "Production for 21-Oct-2025",
-      "masterBillNo": 123,
-      "moduleType": "PRODUCTION",
-      "productId": 2,
-      "productName": "HDPE Crate",
-      "productDetailsId": 2,
-      "type": "Semi-Finished",
-      "colour": "Blue",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 200,
-      "productRemark": "Evening batch"
-    }
-  ]
-}
-```
-
----
-
-## 3. Daily Sale API
-
-### 3.1 Create Daily Sale
-
-**Endpoint:**
 `POST /api/daily-sale`
 
-**Request Payload Example:**
-
 ```json
 {
   "products": [
-    {
-      "product_id": 5,
-      "colour": "Black",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 50,
-      "type": "Retail",
-      "remark": "Local shop delivery"
-    },
-    {
-      "product_id": 2,
-      "colour": "Blue",
-      "unit": "kg",
-      "weight": 25.5,
-      "quantity": 30,
-      "type": "Wholesale",
-      "remark": "Bulk order"
-    }
+    { "product_id": 1, "unit": "pcs", "quantity": 5, "type": "Retail" }
   ],
-  "remark": "Sales completed",
-  "billNo": "SALE-2025-120"
+  "remark": "local sale",
+  "billNo": "SALE-2025-001"
 }
 ```
 
-**Response Payload:**
+### Create Manual Stock (purchase)
 
-```json
-{
-  "success": true,
-  "message": "Daily sale created",
-  "data": [
-    {
-      "id": 7,
-      "date": "2025-10-22",
-      "masterRemark": "Sales entry for 22-Oct-2025",
-      "moduleType": "SALE",
-      "productId": 5,
-      "productName": "Plastic Bottle",
-      "productDetailsId": 9,
-      "type": "Retail",
-      "colour": "Black",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 50,
-      "productRemark": "Local shop delivery",
-      "masterBillNo": "SALE-2025-120"
-    },
-    {
-      "id": 7,
-      "date": "2025-10-22",
-      "masterRemark": "Sales entry for 22-Oct-2025",
-      "moduleType": "SALE",
-      "productId": 2,
-      "productName": "PVC Rod",
-      "productDetailsId": 10,
-      "type": "Wholesale",
-      "colour": "Blue",
-      "unit": "kg",
-      "weight": 25.5,
-      "quantity": 30,
-      "productRemark": "Bulk order",
-      "masterBillNo": "SALE-2025-121"
-    }
-  ]
-}
-```
-
-### 3.2 Get Daily Sale by Date Range
-
-**Endpoint:**
-`GET /api/daily-sale?start=2025-10-20&end=2025-10-22`
-
-**Response Payload:**
-
-```json
-{
-  "success": true,
-  "message": "Daily sale fetched",
-  "data": [
-    {
-      "id": 7,
-      "date": "2025-10-22",
-      "masterRemark": "Sales entry for 22-Oct-2025",
-      "moduleType": "SALE",
-      "productId": 5,
-      "productName": "Plastic Bottle",
-      "productDetailsId": 9,
-      "type": "Retail",
-      "colour": "Black",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 50,
-      "productRemark": "Local shop delivery",
-      "billNo": "SALE-2025-120"
-    }
-  ]
-}
-```
-
----
-
-## 4. Daily Stock API
-
-### 4.1 Create Daily Stock
-
-**Endpoint:**
 `POST /api/daily-stock`
 
-**Request Payload Example:**
-
 ```json
 {
   "products": [
-    {
-      "product_id": 1,
-      "colour": "White",
-      "unit": "kg",
-      "weight": 12.5,
-      "quantity": 200,
-      "type": "Opening Stock",
-      "remark": "Morning count"
-    },
-    {
-      "product_id": 3,
-      "colour": "Green",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 500,
-      "type": "Closing Stock",
-      "remark": "End of day"
-    }
+    { "product_id": 1, "unit": "kg", "quantity": 200, "type": "Opening Stock" }
   ],
-  "remark": "Stock update for today",
+  "remark": "supplier delivery",
   "billNo": "STOCK-2025-010"
 }
 ```
 
-**Response Payload:**
-
-```json
-{
-  "success": true,
-  "message": "Daily stock created",
-  "data": [
-    {
-      "id": 11,
-      "date": "2025-10-22",
-      "masterRemark": "Stock entry for 22-Oct-2025",
-      "moduleType": "STOCK",
-      "productId": 1,
-      "productName": "PVC Pipe",
-      "productDetailsId": 12,
-      "type": "Opening Stock",
-      "colour": "White",
-      "unit": "kg",
-      "weight": 12.5,
-      "quantity": 200,
-      "productRemark": "Morning count",
-      "billNo": "STOCK-2025-010"
-    },
-    {
-      "id": 11,
-      "date": "2025-10-22",
-      "masterRemark": "Stock entry for 22-Oct-2025",
-      "moduleType": "STOCK",
-      "productId": 3,
-      "productName": "Green Cap",
-      "productDetailsId": 13,
-      "type": "Closing Stock",
-      "colour": "Green",
-      "unit": "pcs",
-      "weight": 0,
-      "quantity": 500,
-      "productRemark": "End of day",
-      "billNo": "STOCK-2025-011"
-    }
-  ]
-}
-```
-
-### 4.2 Get Daily Stock by Date Range
-
-**Endpoint:**
-`GET /api/daily-stock?start=2025-10-20&end=2025-10-22`
-
-**Response Payload:**
-
-```json
-{
-  "success": true,
-  "message": "Daily stock fetched",
-  "data": [
-    {
-      "id": 11,
-      "date": "2025-10-22",
-      "masterRemark": "Stock entry for 22-Oct-2025",
-      "moduleType": "STOCK",
-      "productId": 1,
-      "productName": "PVC Pipe",
-      "productDetailsId": 12,
-      "type": "Opening Stock",
-      "colour": "White",
-      "unit": "kg",
-      "weight": 12.5,
-      "quantity": 200,
-      "productRemark": "Morning count",
-      "billNo": "STOCK-2025-010"
-    }
-  ]
-}
-```
 ---
 
-## Notes
+## Important responses (examples)
 
-* API paths are not hardcoded — they are defined in a central constants class.
-* Validation errors return consistent messages.
-* DTOs are used for request/response instead of exposing entities.
+### Success (inventory fetch)
+
+`GET /api/inventory/1`
+
+```json
+{
+  "success": true,
+  "message": "Inventory fetched",
+  "data": { "productId": 1, "productName": "PVC Pipe", "quantity": 97.5, "lastUpdated": "2025-10-23" }
+}
+```
+
+### Global history
+
+`GET /api/inventory/history?start=2025-10-01&end=2025-10-23`
+
+```json
+{
+  "success": true,
+  "message": "Stock entries fetched",
+  "data": [
+    { "id": 101, "productId": 1, "quantity": 50, "direction": "IN", "sourceModule": "PRODUCTION", "entryDate": "2025-10-22" },
+    { "id": 87,  "productId": 1, "quantity": 2,  "direction": "OUT", "sourceModule": "SALE", "entryDate": "2025-10-22" }
+  ]
+}
+```
+
+### Insufficient stock (sale rejected)
+
+HTTP 409
+
+```json
+{
+  "success": false,
+  "message": "Insufficient stock for product 1 (PVC Pipe). Available: 2, required: 5",
+  "data": null
+}
+```
+
+---
+
+## DTOs (what frontend expects)
+
+`InventoryDto`
+
+```json
+{ "productId": 1, "productName": "PVC Pipe", "quantity": 125.5, "lastUpdated": "2025-10-23" }
+```
+
+`StockEntryDto`
+
+```json
+{
+  "id": 101,
+  "productId": 1,
+  "productName": "PVC Pipe",
+  "quantity": 75,
+  "direction": "IN",
+  "sourceModule": "PRODUCTION",
+  "referenceMasterId": 2,
+  "referenceProductDetailsId": 3,
+  "entryDate": "2025-10-22",
+  "remark": "Afternoon run"
+}
+```
+
+`DailyMasterResponseDto`
+
+* Fields: `id, date, masterRemark, moduleType (PRODUCTION|SALE|STOCK), productId, productName, productDetailsId, type, colour, unit, weight, quantity, productRemark, masterBillNo` (when applicable)
+
+---
+
+## DB notes (only what frontend needs)
+
+* Inventory rows: `product_inventory` (product_id unique, quantity numeric)
+* Audit: `stock_entry` (direction IN/OUT, sourceModule, reference_master_id, reference_product_details_id)
+* Global history endpoint reads `stock_entry` with filters for productId/start/end/module/direction.
+
+---
+
+## Rollout tip (short)
+
+1. Deploy with `stock.allow-negative: true` to avoid blocking live sales while validating.
+2. Backfill inventory via `POST /api/inventory/admin/rebuild` (admin-only).
+3. Switch `stock.allow-negative` to `false` when verified.
 
 ---
