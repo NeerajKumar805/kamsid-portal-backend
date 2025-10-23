@@ -8,4 +8,8 @@ public final class ApiPaths {
     public static final String DAILY_PRODUCTION = BASE + "/daily-production";
     public static final String DAILY_STOCK = BASE + "/daily-stock";
     public static final String DAILY_SALE = BASE + "/daily-sale";
+    
+    public static final String INVENTORY = BASE + "/inventory";
+
+    public static final String INVENTORY_HISTORY = INVENTORY + "/history";
 }

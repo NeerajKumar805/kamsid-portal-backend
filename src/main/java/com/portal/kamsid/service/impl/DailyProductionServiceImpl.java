@@ -9,6 +9,8 @@ import com.portal.kamsid.entity.ProductDetails;
 import com.portal.kamsid.repository.DailyProductionRepository;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.DailyProductionService;
+import com.portal.kamsid.service.StockService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +28,7 @@ public class DailyProductionServiceImpl implements DailyProductionService {
 
 	private final DailyProductionRepository dailyRepo;
 	private final ProductRepository productRepo;
+	private final StockService stockService;
 
 	private static final String MODULE = "PRODUCTION";
 	
@@ -80,6 +83,8 @@ public class DailyProductionServiceImpl implements DailyProductionService {
 
 		// save master (cascades ProductDetails)
 		DailyProductionMaster saved = dailyRepo.save(master);
+		
+		stockService.recordProduction(saved);
 
 		// return flat list of response DTOs (one per product row)
 		return saved.getProducts().stream().map(pd -> toDto(saved, pd, MODULE)).collect(Collectors.toList());

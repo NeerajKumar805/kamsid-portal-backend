@@ -23,6 +23,7 @@ import com.portal.kamsid.entity.ProductDetails;
 import com.portal.kamsid.repository.DailySaleRepository;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.DailySaleService;
+import com.portal.kamsid.service.StockService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,6 +34,7 @@ public class DailySaleServiceImpl implements DailySaleService {
 
 	private final DailySaleRepository dailySaleRepo;
 	private final ProductRepository productRepo;
+	private final StockService stockService;
 	
 	private static final String MODULE = "SALE";
 
@@ -71,6 +73,8 @@ public class DailySaleServiceImpl implements DailySaleService {
         }
 
         DailySaleMaster saved = dailySaleRepo.save(master);
+        
+        stockService.recordSale(saved);
 
         return saved.getProducts().stream().map(pd -> toDto(saved, pd, MODULE)).collect(Collectors.toList());
     }

@@ -11,6 +11,8 @@ import com.portal.kamsid.entity.ProductDetails;
 import com.portal.kamsid.repository.DailyStockRepository;
 import com.portal.kamsid.repository.ProductRepository;
 import com.portal.kamsid.service.DailyStockService;
+import com.portal.kamsid.service.StockService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,7 @@ public class DailyStockServiceImpl implements DailyStockService {
 
     private final DailyStockRepository dailyStockRepo;
     private final ProductRepository productRepo;
+    private final StockService stockService;
     
     private static final String MODULE = "STOCK";
 
@@ -82,6 +85,8 @@ public class DailyStockServiceImpl implements DailyStockService {
 
 		// save master (cascades ProductDetails)
 		DailyStockMaster saved = dailyStockRepo.save(master);
+		
+		stockService.recordManualStock(saved);
 
 		// return flat list of response DTOs (one per product row)
 		return saved.getProducts().stream().map(pd -> toDto(saved, pd, MODULE)).collect(Collectors.toList());
